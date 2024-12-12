@@ -1,11 +1,8 @@
-import { _decorator, Component, Node, director } from 'cc';
+import { _decorator, Component, director, Node } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('btnStart_Controller')
 export class btnStart_Controller extends Component {
-
-    
-
     start() {
 
     }
@@ -13,8 +10,6 @@ export class btnStart_Controller extends Component {
     update(deltaTime: number) {
         
     }
-
-
 
     onClick_ChooseBattle()
     {
@@ -25,6 +20,7 @@ export class btnStart_Controller extends Component {
         director.loadScene("Battle1")
     }
 
+    
 }
 
 
