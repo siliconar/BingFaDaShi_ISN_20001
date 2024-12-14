@@ -40,7 +40,6 @@ export class ComponentBase2 extends Component {
     // 处理消息(等待后续重载)
     _processMessage(msg:Message2)
     {
-
     }
     
 

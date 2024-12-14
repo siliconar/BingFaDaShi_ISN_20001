@@ -12,13 +12,16 @@ export class ShaderCover_Controller extends ComponentBase2 {
 
 
     @property
-    MoveSpeed: number = 2;
+    MoveSpeed: number = 70;  // 开关速度
 
-
-
+    @property
     bMove: number = 0;  // -1是开，1是关，0是不动
-    rangePos: number[] = [-300, 0];   // 窗帘的限位
-    cover_curPos: number = -300;  // 窗帘当前的位置
+
+
+    rangePos: number[] = [-896, 0];   // 窗帘的限位
+
+    @property
+    cover_curPos: number = -896;  // 窗帘当前的位置
 
     topcover: Node = null;
     bottomcover: Node = null;

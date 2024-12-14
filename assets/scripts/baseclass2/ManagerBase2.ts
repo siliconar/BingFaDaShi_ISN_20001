@@ -19,14 +19,12 @@ export class ManagerBase2 extends ComponentBase2 {
     // 重写：接受消息，带转发功能
     ReceiveMessage(msg:Message2)
     {
-
         // 判断消息类型，只接受自己的消息
         if(msg.Type[0] != this.OwnMessageType)
             return;
 
         // 调取基类,处理消息
         super.ReceiveMessage(msg);
-
 
         // 转发消息，记得先把自己的消息头去掉
         // 去掉自己的路由头

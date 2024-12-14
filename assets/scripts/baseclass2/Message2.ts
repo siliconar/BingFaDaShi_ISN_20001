@@ -28,12 +28,16 @@ export class Message2 {
 export class MessageType2
 {
     static Type_Empty = 0;
-    static Manager_UI  = 1; 
+
+    static Scene_Choose = 1;
+    static Scene_Battle =2;
+
+    static Manager_UI  = 101; 
 
 
 
 
-    static UI_SHaderMove = 101; // 拉窗帘
+    static UI_SHaderMove = 10101; // 拉窗帘
 }
 
 
