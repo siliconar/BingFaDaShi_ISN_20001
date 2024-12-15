@@ -33,11 +33,12 @@ export class MessageType2
     static Scene_Battle =2;
 
     static Manager_UI  = 101; 
+    static Manager_Tower  = 201; 
 
 
 
-
-    static UI_SHaderMove = 10101; // 拉窗帘
+    static UI_SHaderMove = 10101; // Shader节点
+    static Tower_TowerNode = 20101; // 塔节点
 }
 
 

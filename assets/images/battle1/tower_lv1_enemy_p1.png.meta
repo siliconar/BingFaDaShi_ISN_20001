@@ -2,7 +2,7 @@
   "ver": "1.0.27",
   "importer": "image",
   "imported": true,
-  "uuid": "eb85f392-d2f3-4080-ad22-63a75c3efb49",
+  "uuid": "ba61edb3-4cde-4a3d-b187-ffe6597817ac",
   "files": [
     ".json",
     ".png"
@@ -10,14 +10,14 @@
   "subMetas": {
     "6c48a": {
       "importer": "texture",
-      "uuid": "eb85f392-d2f3-4080-ad22-63a75c3efb49@6c48a",
-      "displayName": "tower_lv3_enemy",
+      "uuid": "ba61edb3-4cde-4a3d-b187-ffe6597817ac@6c48a",
+      "displayName": "tower_lv1_enemy_p1",
       "id": "6c48a",
       "name": "texture",
       "userData": {
         "wrapModeS": "clamp-to-edge",
         "wrapModeT": "clamp-to-edge",
-        "imageUuidOrDatabaseUri": "eb85f392-d2f3-4080-ad22-63a75c3efb49",
+        "imageUuidOrDatabaseUri": "ba61edb3-4cde-4a3d-b187-ffe6597817ac",
         "isUuid": true,
         "visible": false,
         "minfilter": "linear",
@@ -34,8 +34,8 @@
     },
     "f9941": {
       "importer": "sprite-frame",
-      "uuid": "eb85f392-d2f3-4080-ad22-63a75c3efb49@f9941",
-      "displayName": "tower_lv3_enemy",
+      "uuid": "ba61edb3-4cde-4a3d-b187-ffe6597817ac@f9941",
+      "displayName": "tower_lv1_enemy_p1",
       "id": "f9941",
       "name": "spriteFrame",
       "userData": {
@@ -114,7 +114,7 @@
           ]
         },
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "eb85f392-d2f3-4080-ad22-63a75c3efb49@6c48a",
+        "imageUuidOrDatabaseUri": "ba61edb3-4cde-4a3d-b187-ffe6597817ac@6c48a",
         "atlasUuid": ""
       },
       "ver": "1.0.12",
@@ -129,6 +129,6 @@
     "type": "sprite-frame",
     "hasAlpha": true,
     "fixAlphaTransparencyArtifacts": false,
-    "redirect": "eb85f392-d2f3-4080-ad22-63a75c3efb49@6c48a"
+    "redirect": "ba61edb3-4cde-4a3d-b187-ffe6597817ac@6c48a"
   }
 }

@@ -31,6 +31,9 @@ export class ManagerBase2 extends ComponentBase2 {
         let newmsg = new Message2(msg.Type,msg.Command,msg.Content)
         newmsg.Type.shift() // 删除第一个路由
 
+        if (newmsg.Type.length ==0) // 如果没有消息要转发了，那就结束
+            return;
+
         // 转发为所有注册者，让他们自己判断是不是自己的消息
         for(let i_receiver of this.Receiver_List)
         {
