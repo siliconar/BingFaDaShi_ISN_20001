@@ -14,6 +14,8 @@ export class ComponentBase2 extends Component {
     // 只接受那种类型的消息
     OwnMessageType:MessageType2; 
     
+    // 自身注册得到的ID，实际是在父节点列表中的位置，用于非广播消息使用
+    RegisterID:number = -1
     
     protected onLoad(): void {
         // 每次实例化的时候，都要指定自己接收消息的类型

@@ -13,7 +13,10 @@ export class TowerNode_Controller extends ComponentBase2 {
     @property
     cur_Tower_Level:number = 2;           // 塔的等级
 
+    @property
     cur_Party:number = -1;          // 塔所属阵营，-1 -2 -3 -4是敌人  0中立 1自己
+
+    
     cur_ActiveTowerID = 0;          // 当前激活的塔的编号
 
     start() {
