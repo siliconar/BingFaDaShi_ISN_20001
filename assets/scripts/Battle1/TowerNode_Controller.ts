@@ -1,11 +1,11 @@
 import { _decorator, Component, Label, math, Node, NodeEventType, Sprite } from 'cc';
-import { ComponentBase2 } from '../baseclass2/ComponentBase2';
-import { ManagerBase2 } from '../baseclass2/ManagerBase2';
-import { Message2, MessageType2 } from '../baseclass2/Message2';
+import { GObjectbase1 } from '../baseclass3/GObjectbase1';
+import { Message3 } from '../baseclass3/Message3';
+import { MessageCenter3 } from '../baseclass3/MessageCenter3';
 const { ccclass, property } = _decorator;
 
 @ccclass('TowerNode_Controller')
-export class TowerNode_Controller extends ComponentBase2 {
+export class TowerNode_Controller extends GObjectbase1 {
 
     @property
     cur_soldier_cnt:number = 10;    // 塔中当前的士兵数量
@@ -19,13 +19,19 @@ export class TowerNode_Controller extends ComponentBase2 {
     
     cur_ActiveTowerID = 0;          // 当前激活的塔的编号
 
+    child_label:Label = null;
+
     start() {
-        // 注册自己
-        this.node.parent.getComponent(ManagerBase2).RegisterReceiver(this)
+        // 注册messagecenter
+        MessageCenter3.getInstance(this.BelongedSceneName).RegisterReceiver(this.OwnNodeName, this);
+
+        // 获取组件
+        this.child_label = this.node.children[this.node.children.length-1].getComponent(Label);
+
         // 换图片
         this.ChangeImage(this.cur_Tower_Level, this.cur_Party)
         // 换数字
-        this.ChangeLabel(20)
+        this.ChangeLabel(this.cur_soldier_cnt)
     }
 
     update(deltaTime: number) {
@@ -34,12 +40,13 @@ export class TowerNode_Controller extends ComponentBase2 {
 
     // 重载
     // 设置自己接受消息的类型
-    _setOwnMessageType() {
-        return MessageType2.Tower_TowerNode;
+    _setOwnNodeName():string
+    {
+        return this.node.name  // 塔node，使用自己的名称注册
     }
 
     // 处理消息
-    _processMessage(msg: Message2) {
+    _processMessage(msg: Message3) {
     }
 
 
@@ -56,8 +63,8 @@ export class TowerNode_Controller extends ComponentBase2 {
             id_child = (level-1)*2+1;
         }
 
-        this.node.children[this.cur_ActiveTowerID].active = false;  // 关闭当前塔
-        this.node.children[id_child].active = true;  // 激活要显示的塔
+        this.node.children[this.cur_ActiveTowerID].active = false;  // 关闭当前塔的显示
+        this.node.children[id_child].active = true;  // 激活要显示的塔的显示
         this.cur_ActiveTowerID = id_child;
     }
 
@@ -65,7 +72,7 @@ export class TowerNode_Controller extends ComponentBase2 {
     // 替换数字
     ChangeLabel(soldier_cnt:number)
     {
-        this.node.children[this.node.children.length-1].getComponent(Label).string = soldier_cnt.toString();
+        this.child_label.string = soldier_cnt.toString();  // 最后一个节点一定是label
         this.cur_soldier_cnt = soldier_cnt;
     }
 }

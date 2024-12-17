@@ -1,6 +1,6 @@
 import { _decorator, Component, Director, director, Node } from 'cc';
-import { MessageCenter2 } from '../baseclass2/MessageCenter2';
-import { MessageType2 } from '../baseclass2/Message2';
+import { Message3 } from '../baseclass3/Message3';
+import { MessageCenter3 } from '../baseclass3/MessageCenter3';
 const { ccclass, property } = _decorator;
 
 @ccclass('btnStart_Controller')
@@ -15,9 +15,8 @@ export class btnStart_Controller extends Component {
 
     onClick_ChooseBattle()
     {
-        // 播放shader动画
-        let mes_list = [MessageType2.Scene_Choose, MessageType2.Manager_UI, MessageType2.UI_SHaderMove]
-        MessageCenter2.SendCustomerMessage(mes_list,1,1)
+        // 消息中心发送消息，让shader开始合并
+        MessageCenter3.getInstance("ChooseBattle1").SendCustomerMessage("",["shader_1"],1,"")
 
         // 延时加载场景
         this.scheduleOnce(function(){

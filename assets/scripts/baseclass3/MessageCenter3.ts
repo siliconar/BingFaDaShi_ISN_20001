@@ -10,7 +10,7 @@ export class MessageCenter3 {
 
 
     // --------工厂生产线<场景名，自己instance>
-    static Map_Instance = new Map<string, MessageCenter3>();
+    protected static Map_Instance = new Map<string, MessageCenter3>();
 
     // 创建一个Instance，并且加入生产线队列，注意，这个外部不调用
     static createInstance(scenename1:string)

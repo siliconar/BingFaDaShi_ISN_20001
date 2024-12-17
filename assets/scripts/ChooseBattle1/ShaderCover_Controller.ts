@@ -1,11 +1,11 @@
 import { _decorator, Component, Node } from 'cc';
-import { ComponentBase2 } from '../baseclass2/ComponentBase2';
-import { ManagerBase2 } from '../baseclass2/ManagerBase2';
-import { Message2, MessageType2 } from '../baseclass2/Message2';
+import { GObjectbase1 } from '../baseclass3/GObjectbase1';
+import { Message3 } from '../baseclass3/Message3';
+import { MessageCenter3 } from '../baseclass3/MessageCenter3';
 const { ccclass, property } = _decorator;
 
 @ccclass('ShaderCover_Controller')
-export class ShaderCover_Controller extends ComponentBase2 {
+export class ShaderCover_Controller extends GObjectbase1 {
     // start() {
 
     // }
@@ -29,8 +29,8 @@ export class ShaderCover_Controller extends ComponentBase2 {
     protected start(): void {
 
 
-        // 注册父节点
-        this.node.parent.getComponent(ManagerBase2).RegisterReceiver(this)
+        // 注册messagecenter
+        MessageCenter3.getInstance(this.BelongedSceneName).RegisterReceiver(this.OwnNodeName, this);
 
         this.topcover = this.node.children[0];
         this.bottomcover = this.node.children[1];
@@ -40,12 +40,12 @@ export class ShaderCover_Controller extends ComponentBase2 {
 
     // 重载
     // 设置自己接受消息的类型
-    _setOwnMessageType() {
-        return MessageType2.UI_SHaderMove;
+    _setOwnNodeName(): string {
+        return "shader_1"
     }
 
     // 处理消息
-    _processMessage(msg: Message2) {
+    _processMessage(msg: Message3) {
         this.bMove = msg.Command
     }
 
@@ -60,24 +60,24 @@ export class ShaderCover_Controller extends ComponentBase2 {
             {
                 this.cover_curPos = this.cover_curPos + this.MoveSpeed   // 更新进度条
                 let top_pos = this.topcover.getPosition()
-                this.topcover.setPosition(top_pos.x, top_pos.y-this.MoveSpeed*this.bMove)
+                this.topcover.setPosition(top_pos.x, top_pos.y - this.MoveSpeed * this.bMove)
                 let bottom_pos = this.bottomcover.getPosition()
-                this.bottomcover.setPosition(bottom_pos.x, bottom_pos.y+this.MoveSpeed*this.bMove)
+                this.bottomcover.setPosition(bottom_pos.x, bottom_pos.y + this.MoveSpeed * this.bMove)
             }
             else // 如果窗帘拉到位了，停止拉窗帘
             {
                 this.bMove = 0;
             }
         }
-        else if(this.bMove == -1)  // 如果是开窗帘
+        else if (this.bMove == -1)  // 如果是开窗帘
         {
             if (this.cover_curPos > this.rangePos[0])  // 如果窗帘没拉到位
             {
                 this.cover_curPos = this.cover_curPos - this.MoveSpeed   // 更新进度条
                 let top_pos = this.topcover.getPosition()
-                this.topcover.setPosition(top_pos.x, top_pos.y-this.MoveSpeed*this.bMove)
+                this.topcover.setPosition(top_pos.x, top_pos.y - this.MoveSpeed * this.bMove)
                 let bottom_pos = this.bottomcover.getPosition()
-                this.bottomcover.setPosition(bottom_pos.x, bottom_pos.y+this.MoveSpeed*this.bMove)
+                this.bottomcover.setPosition(bottom_pos.x, bottom_pos.y + this.MoveSpeed * this.bMove)
             }
             else // 如果窗帘拉到位了，停止拉窗帘
             {
