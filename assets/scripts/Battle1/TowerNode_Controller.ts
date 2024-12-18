@@ -2,44 +2,44 @@ import { _decorator, Component, Label, math, Node, NodeEventType, Sprite, input,
 import { GObjectbase1 } from '../baseclass3/GObjectbase1';
 import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
+import { DrawLineMaskManager_Controller } from './DrawLineMaskManager_Controller';
+import { DrawLineMaskManager_Controller2 } from './DrawLineMaskManager_Controller2';
 const { ccclass, property } = _decorator;
 
 @ccclass('TowerNode_Controller')
 export class TowerNode_Controller extends GObjectbase1 {
 
     @property
-    cur_soldier_cnt:number = 10;    // 塔中当前的士兵数量
+    cur_soldier_cnt: number = 10;    // 塔中当前的士兵数量
 
     @property
-    cur_Tower_Level:number = 2;           // 塔的等级
+    cur_Tower_Level: number = 2;           // 塔的等级
 
     @property
-    cur_Party:number = -1;          // 塔所属阵营，-1 -2 -3 -4是敌人  0中立 1自己
+    cur_Party: number = -1;          // 塔所属阵营，-1 -2 -3 -4是敌人  0中立 1自己
 
     @property(Node)
-    Arrow:Node = null;
+    Arrow: Node = null;
 
-    
+
     cur_ActiveTowerID = 0;          // 当前激活的塔的编号
 
-    child_label:Label = null;
+    child_label: Label = null;
 
     protected onLoad(): void {
         super.onLoad()
 
-        input.on(Input.EventType.c, this.onTouchMove,this);
-
-        
+        this.node.on(Node.EventType.TOUCH_START, this.onTowerTouchStart, this)
+        this.node.on(Node.EventType.TOUCH_MOVE, this.onTowerTouchMove, this)
+        this.node.on(Node.EventType.TOUCH_END, this.onTowerTouchEnd, this)
+        this.node.on(Node.EventType.TOUCH_CANCEL, this.onTowerTouchCancel, this)
     }
-    
+
     protected onDestroy(): void {
-        input.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
-    }
-
-    onTouchMove(event:EventTouch)
-    {
-        console.log(event.getDeltaX, event.getDeltaY)
-
+        this.node.off(Node.EventType.TOUCH_START, this.onTowerTouchStart, this)
+        this.node.off(Node.EventType.TOUCH_MOVE, this.onTowerTouchMove, this)
+        this.node.off(Node.EventType.TOUCH_END, this.onTowerTouchEnd, this)
+        this.node.off(Node.EventType.TOUCH_CANCEL, this.onTowerTouchCancel, this)
     }
 
     start() {
@@ -47,8 +47,8 @@ export class TowerNode_Controller extends GObjectbase1 {
         MessageCenter3.getInstance(this.BelongedSceneName).RegisterReceiver(this.OwnNodeName, this);
 
         // 获取组件
-        this.child_label = this.node.children[this.node.children.length-1].getComponent(Label);
-        
+        this.child_label = this.node.children[this.node.children.length - 1].getComponent(Label);
+
 
         // 换图片
         this.ChangeImage(this.cur_Tower_Level, this.cur_Party)
@@ -62,8 +62,7 @@ export class TowerNode_Controller extends GObjectbase1 {
 
     // 重载
     // 设置自己接受消息的类型
-    _setOwnNodeName():string
-    {
+    _setOwnNodeName(): string {
         return this.node.name  // 塔node，使用自己的名称注册
     }
 
@@ -82,16 +81,15 @@ export class TowerNode_Controller extends GObjectbase1 {
 
 
     // 换图片
-    private ChangeImage(level:number, party:number)
-    {
+    private ChangeImage(level: number, party: number) {
         let id_child = -1;
-        if(party == 1)   // 如果是自己
+        if (party == 1)   // 如果是自己
         {
-            id_child = (level-1)*2;
+            id_child = (level - 1) * 2;
         }
         else // 如果是敌人
         {
-            id_child = (level-1)*2+1;
+            id_child = (level - 1) * 2 + 1;
         }
 
         this.node.children[this.cur_ActiveTowerID].active = false;  // 关闭当前塔的显示
@@ -101,15 +99,40 @@ export class TowerNode_Controller extends GObjectbase1 {
 
 
     // 替换数字
-    private ChangeLabel(soldier_cnt:number)
-    {
+    private ChangeLabel(soldier_cnt: number) {
         this.child_label.string = soldier_cnt.toString();  // 最后一个节点一定是label
     }
 
-    ShowArrow(bshow:boolean)
-    {
+    ShowArrow(bshow: boolean) {
         this.Arrow.active = bshow;
     }
+
+    // 由塔的on消息调用，给DrawLineMaskManager发消息
+    onTowerTouchStart(event: EventTouch) {
+        // event.preventSwallow = true   //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
+        
+        DrawLineMaskManager_Controller2.Instance.SetDrawStartPoint(event.getLocationX(), event.getLocationY())
+    }
+
+    // 由塔的on消息调用
+    onTowerTouchMove(event: EventTouch) {
+        // event.preventSwallow = true  //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
+        DrawLineMaskManager_Controller2.Instance.SetDrawEndPoint(event.getLocationX(), event.getLocationY())
+    }
+
+    // 由塔的on消息调用
+    onTowerTouchEnd(event: EventTouch) {
+        // event.preventSwallow = true //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
+        DrawLineMaskManager_Controller2.Instance.StopDraw()
+    }
+
+    // 由塔的on消息调用
+    onTowerTouchCancel(event: EventTouch) {
+        // event.preventSwallow = true //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
+        DrawLineMaskManager_Controller2.Instance.StopDraw()
+    }
+
+
 }
 
 
