@@ -16,6 +16,9 @@ export class TowerNode_Controller extends GObjectbase1 {
     @property
     cur_Party:number = -1;          // 塔所属阵营，-1 -2 -3 -4是敌人  0中立 1自己
 
+    @property(Node)
+    Arrow:Node = null;
+
     
     cur_ActiveTowerID = 0;          // 当前激活的塔的编号
 
@@ -74,6 +77,11 @@ export class TowerNode_Controller extends GObjectbase1 {
     {
         this.child_label.string = soldier_cnt.toString();  // 最后一个节点一定是label
         this.cur_soldier_cnt = soldier_cnt;
+    }
+
+    ShowArrow(bshow:boolean)
+    {
+        this.Arrow.active = bshow;
     }
 }
 

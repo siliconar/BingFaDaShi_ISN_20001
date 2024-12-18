@@ -42,7 +42,7 @@ export class GObjectbase1 extends Component {
         this._processMessage(msg);
     }
 
-    // 处理消息(等待后续重载)
+    // 处理消息（需要每个Instance重写）
     _processMessage(msg:Message3)
     {
     }
