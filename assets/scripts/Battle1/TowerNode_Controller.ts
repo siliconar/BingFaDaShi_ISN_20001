@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, math, Node, NodeEventType, Sprite } from 'cc';
+import { _decorator, Component, Label, math, Node, NodeEventType, Sprite, input, Input, EventTouch } from 'cc';
 import { GObjectbase1 } from '../baseclass3/GObjectbase1';
 import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
@@ -24,12 +24,31 @@ export class TowerNode_Controller extends GObjectbase1 {
 
     child_label:Label = null;
 
+    protected onLoad(): void {
+        super.onLoad()
+
+        input.on(Input.EventType.c, this.onTouchMove,this);
+
+        
+    }
+    
+    protected onDestroy(): void {
+        input.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+    }
+
+    onTouchMove(event:EventTouch)
+    {
+        console.log(event.getDeltaX, event.getDeltaY)
+
+    }
+
     start() {
         // 注册messagecenter
         MessageCenter3.getInstance(this.BelongedSceneName).RegisterReceiver(this.OwnNodeName, this);
 
         // 获取组件
         this.child_label = this.node.children[this.node.children.length-1].getComponent(Label);
+        
 
         // 换图片
         this.ChangeImage(this.cur_Tower_Level, this.cur_Party)
@@ -53,8 +72,17 @@ export class TowerNode_Controller extends GObjectbase1 {
     }
 
 
+
+    // 塔添加了兵,可能敌对，可能自己方
+    // TowerConflictSoilder(dt_Soldier:number, Soldier_party:number)
+    // {
+
+
+    // }
+
+
     // 换图片
-    ChangeImage(level:number, party:number)
+    private ChangeImage(level:number, party:number)
     {
         let id_child = -1;
         if(party == 1)   // 如果是自己
@@ -73,10 +101,9 @@ export class TowerNode_Controller extends GObjectbase1 {
 
 
     // 替换数字
-    ChangeLabel(soldier_cnt:number)
+    private ChangeLabel(soldier_cnt:number)
     {
         this.child_label.string = soldier_cnt.toString();  // 最后一个节点一定是label
-        this.cur_soldier_cnt = soldier_cnt;
     }
 
     ShowArrow(bshow:boolean)
