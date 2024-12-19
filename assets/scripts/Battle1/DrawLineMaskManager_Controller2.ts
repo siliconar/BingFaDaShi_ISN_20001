@@ -24,6 +24,13 @@ export class DrawLineMaskManager_Controller2 extends GObjectbase1 {
     end_wx: number = -1;     // 箭头终止绘图点世界坐标
     end_wy: number = -1;
 
+    readonly arrow_width:number = 180+15;
+
+    // 杆子
+    arrow:Node = null;
+    arrow_head:Node = null;
+    arrow_body:Node = null;
+
     // ----- 重载
     // 设置自己接受消息的类型，等待继承重写。
     _setOwnNodeName(): string {
@@ -40,7 +47,10 @@ export class DrawLineMaskManager_Controller2 extends GObjectbase1 {
         // 注册messagecenter
         MessageCenter3.getInstance(this.BelongedSceneName).RegisterReceiver(this.OwnNodeName, this);
 
-
+        // 组件
+        this.arrow = this.node.children[0]
+        this.arrow_head = this.node.children[0].children[0];
+        this.arrow_body = this.node.children[0].children[1];
     }
 
     update(deltaTime: number) {
@@ -53,7 +63,18 @@ export class DrawLineMaskManager_Controller2 extends GObjectbase1 {
             this.previous_end_wx = this.end_wx
             this.previous_end_wy = this.end_wy
 
-            console.log(this.start_wx.toString() + "_" + this.end_wx.toString())
+
+            let dt_x = this.start_wx - this.end_wx;
+            let dt_y = this.start_wy - this.end_wy;
+            let tmpdist = Math.sqrt(dt_x*dt_x+dt_y*dt_y);  // 自此我们可以计算出宽度
+
+            let angle = Math.atan2(dt_y,dt_x) *180/Math.PI;
+
+            this.arrow.setWorldPosition(this.end_wx, this.end_wy,0)
+            this.arrow.setRotationFromEuler(0,0,angle+180)
+            this.arrow_body.setScale(tmpdist/this.arrow_width,1,1)
+            // console.log((this.end_wx).toString()+"_"+(this.end_wy).toString())
+
         }
 
     }
