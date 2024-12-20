@@ -5,5 +5,28 @@
       "width": 828,
       "height": 1792
     }
+  },
+  "layer": [
+    {
+      "name": "Battle1",
+      "value": 8
+    }
+  ],
+  "physics": {
+    "collisionGroups": [
+      {
+        "index": 1,
+        "name": "ArrowLine"
+      },
+      {
+        "index": 2,
+        "name": "TowerNode"
+      }
+    ],
+    "collisionMatrix": {
+      "0": 1,
+      "1": 4,
+      "2": 2
+    }
   }
 }
