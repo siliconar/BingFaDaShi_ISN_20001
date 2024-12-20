@@ -115,7 +115,7 @@ export class TowerNode_Controller extends GObjectbase1 {
         let ty = this.node.getWorldPosition().y
         tx = Math.floor(tx)
         ty = Math.floor(ty)
-        DrawLineMaskManager_Controller2.Instance.SetDrawStartPoint(tx, ty)
+        DrawLineMaskManager_Controller2.Instance.arrow_Script.SetDrawStartPoint(tx, ty)
     }
 
     // 由塔的on消息调用
@@ -125,19 +125,19 @@ export class TowerNode_Controller extends GObjectbase1 {
         let ty = event.getUILocation().y
         tx = Math.floor(tx)
         ty = Math.floor(ty)
-        DrawLineMaskManager_Controller2.Instance.SetDrawEndPoint(tx,ty)
+        DrawLineMaskManager_Controller2.Instance.arrow_Script.SetDrawEndPoint(tx,ty)
     }
 
     // 由塔的on消息调用
     onTowerTouchEnd(event: EventTouch) {
         // event.preventSwallow = true //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
-        DrawLineMaskManager_Controller2.Instance.StopDraw()
+        DrawLineMaskManager_Controller2.Instance.arrow_Script.StopDraw()
     }
 
     // 由塔的on消息调用
     onTowerTouchCancel(event: EventTouch) {
         // event.preventSwallow = true //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
-        DrawLineMaskManager_Controller2.Instance.StopDraw()
+        DrawLineMaskManager_Controller2.Instance.arrow_Script.StopDraw()
     }
 
 
