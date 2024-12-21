@@ -3,12 +3,16 @@ import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
 import { GObjectbase1 } from '../baseclass3/GObjectbase1';
 import { TowerNode_Controller } from './TowerNode_Controller';
+import { TowerManager_Controller } from './TowerManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('LineArrow_Controller')
 export class LineArrow_Controller extends GObjectbase1 {
 
 
+    // 注意，LineArrow是顶层，碰撞体一直在移动，但是不可锁定
+    // 下面LineArrowImage只是图像载体，无碰撞体，可以移动，可以锁定
+    // 这么设计是因为，可以让碰撞体自由移动，但是箭头锁定不动。
 
     //---- 变量
     bStartConnect: boolean = false;   // 是否开始连接了
@@ -18,7 +22,8 @@ export class LineArrow_Controller extends GObjectbase1 {
     previous_end_wy: number = -1;
     end_wx: number = -1;     // 箭头终止绘图点世界坐标
     end_wy: number = -1;
-
+    starttower_name: string = "";    // 箭头从哪个塔出发
+    connecttower_name_List: string[];    // 箭头可以连接的塔
 
     block_end = false;   // 是否锁住终点
     lock_endx: number = -1;
@@ -26,9 +31,9 @@ export class LineArrow_Controller extends GObjectbase1 {
 
     readonly arrow_width: number = 180 + 15;  // 原始的箭头宽度
 
-
-    arrow_head: Node = null;    // 箭头
-    arrow_body: Node = null;    // 箭头
+    arrow_Image:Node = null;  // 承载整个箭头图像的Node
+    // arrow_head: Node = null;    // 箭头
+    // arrow_body: Node = null;    // 箭头
 
 
     local_collider: Collider2D = null; // 箭头尖尖的小碰撞体
@@ -49,7 +54,7 @@ export class LineArrow_Controller extends GObjectbase1 {
     protected onDestroy(): void {
         if (this.local_collider) {
             this.local_collider.off(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
-            this.local_collider.off(Contact2DType.END_CONTACT, this.onEndContact, this);
+            // this.local_collider.off(Contact2DType.END_CONTACT, this.onEndContact, this);
         }
     }
 
@@ -58,9 +63,9 @@ export class LineArrow_Controller extends GObjectbase1 {
         // 注册messagecenter
         MessageCenter3.getInstance(this.BelongedSceneName).RegisterReceiver(this.OwnNodeName, this);
 
-
-        this.arrow_head = this.node.children[0];
-        this.arrow_body = this.node.children[1];
+        this.arrow_Image = this.node.children[0];
+        this.arrow_head = this.arrow_Image.children[0];
+        this.arrow_body = this.arrow_Image.children[1];
         this.arrow_body.setScale(0, 0, 1)   // 把箭头隐藏掉
         this.arrow_head.setScale(0, 0, 1) // 把箭头隐藏掉
 
@@ -68,36 +73,56 @@ export class LineArrow_Controller extends GObjectbase1 {
         this.local_collider = this.getComponent(Collider2D);
         if (this.local_collider) {
             this.local_collider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
-            this.local_collider.on(Contact2DType.END_CONTACT, this.onEndContact, this);
+            // this.local_collider.on(Contact2DType.END_CONTACT, this.onEndContact, this);
         }
     }
 
     update(deltaTime: number) {
-        if (this.bStartConnect) {
-            if (this.previous_end_wx == this.end_wx && this.previous_end_wy == this.end_wy)  // 如果终点没变化，就不用绘图了
+
+        // 如果真的需要绘制
+        if (this.bStartConnect)   
+        {
+
+            // 如果锁住了，那么就画锁住的位置就行
+            let draw_endx:number;
+            let draw_endy:number;
+            if(this.block_end)
+            {
+                draw_endx = this.lock_endx
+                draw_endy = this.lock_endy
+            }
+            else
+            {
+                draw_endx = this.end_wx
+                draw_endy = this.end_wy
+            }
+
+
+            // 绘图部分
+            if (this.previous_end_wx == draw_endx && this.previous_end_wy == draw_endy)  // 如果终点没变化，就不用绘图了
                 return
 
-            this.previous_end_wx = this.end_wx
-            this.previous_end_wy = this.end_wy
+            this.previous_end_wx = draw_endx
+            this.previous_end_wy = draw_endy
 
 
-            let dt_x = this.start_wx - this.end_wx;
-            let dt_y = this.start_wy - this.end_wy;
+            let dt_x = this.start_wx - draw_endx;
+            let dt_y = this.start_wy - draw_endy;
             let tmpdist = Math.sqrt(dt_x * dt_x + dt_y * dt_y);  // 自此我们可以计算出宽度
 
             let angle = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
 
-            this.node.setWorldPosition(this.end_wx, this.end_wy, 0)
-            this.node.setRotationFromEuler(0, 0, angle + 180)
+            this.arrow_Image.setWorldPosition(draw_endx, draw_endy, 0)
+            this.arrow_Image.setRotationFromEuler(0, 0, angle + 180)
             this.arrow_body.setScale(tmpdist / this.arrow_width, 1, 1)
-            // console.log((this.end_wx).toString()+"_"+(this.end_wy).toString())
+            // console.log((draw_endx).toString()+"_"+(draw_endy).toString())
 
         }
     }
 
 
     // 设置起始绘图点并开始绘图
-    SetDrawStartPoint(w_x: number, w_y: number) {
+    SetDrawStartPoint(starttower_name: string, w_x: number, w_y: number) {
         this.start_wx = w_x;
         this.start_wy = w_y;
         this.end_wx = w_x;
@@ -106,6 +131,16 @@ export class LineArrow_Controller extends GObjectbase1 {
         this.arrow_head.setScale(1, 1, 1)  //放出箭头
 
         this._ArrowColorRed()  // 变更为红色
+        this.starttower_name = starttower_name;   // 获取原始塔的名字
+        // 查询可以连接的塔有哪些
+        this.connecttower_name_List = TowerManager_Controller.Instance.towerGraph1.getConnections(this.starttower_name)
+        // 让可以连接的塔上面有箭头
+        if (this.connecttower_name_List != null)
+            MessageCenter3.getInstance(this.BelongedSceneName).SendCustomerMessage("", this.connecttower_name_List, 1, true)
+
+        // 重要，打开碰撞器
+        this.local_collider.enabled = true;
+
     }
 
     // 随着鼠标移动，改变终止绘图点
@@ -119,6 +154,13 @@ export class LineArrow_Controller extends GObjectbase1 {
         this.bStartConnect = false;   // 关闭作图模式
         this.arrow_body.setScale(0, 0, 1)
         this.arrow_head.setScale(0, 0, 1)
+
+        // 停止所有箭头
+        MessageCenter3.getInstance(this.BelongedSceneName).SendCustomerMessage("", ["TowerManager"], 1, false)
+
+        // 重要，关闭碰撞器
+        this.local_collider.enabled = false;
+
     }
 
 
@@ -152,7 +194,7 @@ export class LineArrow_Controller extends GObjectbase1 {
         if (tower_com != null) {
 
             // 判断能不能碰撞
-            let bAllowConnect = 未完成;
+            const bAllowConnect =  this.connecttower_name_List !== undefined && this.connecttower_name_List.indexOf(tower_com.OwnNodeName) !== -1;
 
             // 能碰撞就锁死 变蓝
             if (bAllowConnect) {
@@ -170,11 +212,13 @@ export class LineArrow_Controller extends GObjectbase1 {
     }
 
     // 碰撞回调
-    onEndContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
+    // onEndContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
 
-        // 箭头标红
-        this._ArrowColorRed();
-    }
+    //     // 箭头解锁
+    //     this._unlock_end();
+    //     // 箭头标红
+    //     this._ArrowColorRed();
+    // }
 
 
 

@@ -68,6 +68,15 @@ export class TowerNode_Controller extends GObjectbase1 {
 
     // 处理消息
     _processMessage(msg: Message3) {
+        // cmd =1 该单个塔节点执行箭头, Content= bool 开关
+
+        if(1 == msg.Command) // md =1 该单个塔节点执行箭头, Content= bool 开关
+        {
+            let bshow = msg.Content;
+            this.ShowArrow(bshow)
+        }
+
+
     }
 
 
@@ -115,7 +124,7 @@ export class TowerNode_Controller extends GObjectbase1 {
         let ty = this.node.getWorldPosition().y
         tx = Math.floor(tx)
         ty = Math.floor(ty)
-        DrawLineMaskManager_Controller2.Instance.arrow_Script.SetDrawStartPoint(tx, ty)
+        DrawLineMaskManager_Controller2.Instance.arrow_Script.SetDrawStartPoint(this.OwnNodeName, tx, ty)
     }
 
     // 由塔的on消息调用
