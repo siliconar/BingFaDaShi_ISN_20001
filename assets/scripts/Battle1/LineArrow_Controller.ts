@@ -4,6 +4,7 @@ import { MessageCenter3 } from '../baseclass3/MessageCenter3';
 import { GObjectbase1 } from '../baseclass3/GObjectbase1';
 import { TowerNode_Controller } from './TowerNode_Controller';
 import { TowerManager_Controller } from './TowerManager_Controller';
+import { LinesManager_Controller } from './LinesManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('LineArrow_Controller')
@@ -26,6 +27,7 @@ export class LineArrow_Controller extends GObjectbase1 {
     connecttower_name_List: string[];    // 箭头可以连接的塔
 
     block_end = false;   // 是否锁住终点
+    lock_end_name:string;  // 锁住节点的名字
     lock_endx: number = -1;
     lock_endy: number = -1;
 
@@ -81,21 +83,6 @@ export class LineArrow_Controller extends GObjectbase1 {
 
         // 如果真的需要绘制
         if (this.bStartConnect) {
-
-            // // 如果锁住了，那么就画锁住的位置就行
-            // let draw_endx:number;
-            // let draw_endy:number;
-            // if(this.block_end)
-            // {
-            //     draw_endx = this.lock_endx
-            //     draw_endy = this.lock_endy
-            // }
-            // else
-            // {
-            //     draw_endx = this.end_wx
-            //     draw_endy = this.end_wy
-            // }
-
 
             // 绘图部分
             if (this.previous_end_wx == this.end_wx && this.previous_end_wy == this.lock_endy)  // 如果终点没变化，就不用绘图了
@@ -170,6 +157,9 @@ export class LineArrow_Controller extends GObjectbase1 {
 
     // 停止绘图
     StopDraw() {
+
+        console.log("停止作图")
+
         this.bStartConnect = false;   // 关闭作图模式
         this.arrow_body.setScale(0, 0, 1)
         this.arrow_head.setScale(0, 0, 1)
@@ -177,6 +167,15 @@ export class LineArrow_Controller extends GObjectbase1 {
         // 停止所有箭头
         MessageCenter3.getInstance(this.BelongedSceneName).SendCustomerMessage("", ["TowerManager"], 1, false)
 
+
+        // 发送消息，需要建立一个真实连接
+        // 需要注意的是，我们这里只管玩家试图连接，至于是否真的能连接，怎么建立连接，比如塔还是否有连接点，这些都不关我们
+        if(this.block_end)  // 如果玩家真的试图建立一个有效连接
+        {
+            LinesManager_Controller.Instance.ConnectionInfo2.addConnection(this.starttower_name, this.lock_end_name)
+        }
+        
+        
         // 重要，关闭碰撞器
         this.local_collider.enabled = false;
 
@@ -184,10 +183,11 @@ export class LineArrow_Controller extends GObjectbase1 {
 
 
     // 锁住箭头终点（为了制造磁吸效果）
-    private _lock_end(endpoint: Vec3) {
+    private _lock_end(endname:string, endpoint: Vec3) {
         this.block_end = true;
         this.lock_endx = endpoint.x;
         this.lock_endy = endpoint.y;
+        this.lock_end_name = endname;
     }
     // 解锁箭头终点
     private _unlock_end() {
@@ -212,12 +212,12 @@ export class LineArrow_Controller extends GObjectbase1 {
         let tower_com = otherCollider.getComponent(TowerNode_Controller)
         if (tower_com != null) {
 
-            // 判断能不能碰撞
+            // 判断能不能碰撞,主要是这两个塔拓扑上是否可连接
             const bAllowConnect = this.connecttower_name_List !== undefined && this.connecttower_name_List.indexOf(tower_com.OwnNodeName) !== -1;
 
             // 能碰撞就锁死 变蓝
             if (bAllowConnect) {
-                this._lock_end(tower_com.node.getWorldPosition())
+                this._lock_end(tower_com.OwnNodeName, tower_com.node.getWorldPosition())
                 this._ArrowColorBlue();
             }
             else //不能碰撞就箭头标红
@@ -230,7 +230,7 @@ export class LineArrow_Controller extends GObjectbase1 {
 
     }
 
-    碰撞回调
+    //碰撞回调
     onEndContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
 
         // 箭头解锁

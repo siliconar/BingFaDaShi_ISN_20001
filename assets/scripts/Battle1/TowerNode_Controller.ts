@@ -2,8 +2,8 @@ import { _decorator, Component, Label, math, Node, NodeEventType, Sprite, input,
 import { GObjectbase1 } from '../baseclass3/GObjectbase1';
 import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
-import { DrawLineMaskManager_Controller } from './DrawLineMaskManager_Controller';
 import { DrawLineMaskManager_Controller2 } from './DrawLineMaskManager_Controller2';
+import { LinesManager_Controller } from './LinesManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('TowerNode_Controller')
@@ -22,9 +22,11 @@ export class TowerNode_Controller extends GObjectbase1 {
     Arrow: Node = null;
 
 
-    cur_ActiveTowerID = 0;          // 当前激活的塔的编号
+    cur_ActiveTowerID = 0;          // 当前激活的塔图片的编号
+    child_label: Label = null;      // 塔上的数字
 
-    child_label: Label = null;
+    HasSpaceConnect: boolean = true;   // 是否允许发射线
+
 
     protected onLoad(): void {
         super.onLoad()
@@ -70,7 +72,7 @@ export class TowerNode_Controller extends GObjectbase1 {
     _processMessage(msg: Message3) {
         // cmd =1 该单个塔节点执行箭头, Content= bool 开关
 
-        if(1 == msg.Command) // md =1 该单个塔节点执行箭头, Content= bool 开关
+        if (1 == msg.Command) // md =1 该单个塔节点执行箭头, Content= bool 开关
         {
             let bshow = msg.Content;
             this.ShowArrow(bshow)
@@ -119,32 +121,55 @@ export class TowerNode_Controller extends GObjectbase1 {
     // 由塔的on消息调用，给DrawLineMaskManager发消息
     onTowerTouchStart(event: EventTouch) {
         // event.preventSwallow = true   //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
-        
-        let tx = this.node.getWorldPosition().x
-        let ty = this.node.getWorldPosition().y
-        tx = Math.floor(tx)
-        ty = Math.floor(ty)
-        DrawLineMaskManager_Controller2.Instance.arrow_Script.SetDrawStartPoint(this.OwnNodeName, tx, ty)
+
+        // 首先要判断是否还有连接的空间
+        if (this.cur_Tower_Level <= LinesManager_Controller.Instance.ConnectionInfo2.getConnectionCount(this.OwnNodeName)) {
+            // 如果没有空间了，不响应
+            this.HasSpaceConnect = false;
+            return;
+        }
+        else {
+            // 如果有空间，那就开启连接
+            this.HasSpaceConnect = true;
+
+            let tx = this.node.getWorldPosition().x
+            let ty = this.node.getWorldPosition().y
+            tx = Math.floor(tx)
+            ty = Math.floor(ty)
+            DrawLineMaskManager_Controller2.Instance.arrow_Script.SetDrawStartPoint(this.OwnNodeName, tx, ty)
+        }
     }
 
     // 由塔的on消息调用
     onTowerTouchMove(event: EventTouch) {
+
+        // 如果塔空间满了，不允许发射射线，不响应
+        if (false == this.HasSpaceConnect)
+            return;
+
         // event.preventSwallow = true  //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
         let tx = event.getUILocation().x
         let ty = event.getUILocation().y
         tx = Math.floor(tx)
         ty = Math.floor(ty)
-        DrawLineMaskManager_Controller2.Instance.arrow_Script.SetDrawEndPoint(tx,ty)
+        DrawLineMaskManager_Controller2.Instance.arrow_Script.SetDrawEndPoint(tx, ty)
     }
 
     // 由塔的on消息调用
     onTowerTouchEnd(event: EventTouch) {
+        // 如果塔空间满了，不允许发射射线，不响应
+        if (false == this.HasSpaceConnect)
+            return;
+
         // event.preventSwallow = true //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
         DrawLineMaskManager_Controller2.Instance.arrow_Script.StopDraw()
     }
 
     // 由塔的on消息调用
     onTowerTouchCancel(event: EventTouch) {
+        // 如果塔空间满了，不允许发射射线，不响应
+        if (false == this.HasSpaceConnect)
+            return;
         // event.preventSwallow = true //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
         DrawLineMaskManager_Controller2.Instance.arrow_Script.StopDraw()
     }
