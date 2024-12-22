@@ -4,6 +4,7 @@ import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
 import { DrawLineMaskManager_Controller2 } from './DrawLineMaskManager_Controller2';
 import { LinesManager_Controller } from './LinesManager_Controller';
+import { TowerManager_Controller } from './TowerManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('TowerNode_Controller')
@@ -47,6 +48,9 @@ export class TowerNode_Controller extends GObjectbase1 {
     start() {
         // 注册messagecenter
         MessageCenter3.getInstance(this.BelongedSceneName).RegisterReceiver(this.OwnNodeName, this);
+
+        // 注册Manager
+        TowerManager_Controller.Instance.RegisterReceiver(this.OwnNodeName, this);
 
         // 获取组件
         this.child_label = this.node.children[this.node.children.length - 1].getComponent(Label);

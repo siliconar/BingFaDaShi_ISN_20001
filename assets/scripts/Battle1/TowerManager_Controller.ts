@@ -21,6 +21,9 @@ export class TowerManager_Controller extends GObjectbase1 {
 
     //---- 变量
     towerGraph1: TowerGraph = new TowerGraph();   // 存储着所有塔的拓扑图，每个场景都不一样
+    // 所有塔的注册
+    Receiver_List: Map<string, TowerNode_Controller> = new Map<string, TowerNode_Controller>();
+
 
     //----  重载
     // 设置自己接受消息的类型
@@ -44,7 +47,11 @@ export class TowerManager_Controller extends GObjectbase1 {
 
     }
 
-
+    // 注册子节点
+    RegisterReceiver(nodename:string, node1:TowerNode_Controller)
+    {
+        this.Receiver_List.set(nodename,node1)
+    }
 
 
     start() {
