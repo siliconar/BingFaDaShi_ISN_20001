@@ -172,8 +172,6 @@ export class LineArrow_Controller extends GObjectbase1 {
         // 需要注意的是，我们这里只管玩家试图连接，至于是否真的能连接，怎么建立连接，比如塔还是否有连接点，这些都不关我们
         if(this.block_end)  // 如果玩家真的试图建立一个有效连接
         {
-            // 我觉得不用这个，还是通过另外函数可以
-            // LinesManager_Controller.Instance.ConnectionInfo2.addConnection(this.starttower_name, this.lock_end_name)
             // 建立真实连接，不需要上面手动修改队列了，事情交给LineManager做
             LinesManager_Controller.Instance.CreateOneConnection(this.starttower_name, this.lock_end_name);
 

@@ -127,7 +127,7 @@ export class TowerNode_Controller extends GObjectbase1 {
         // event.preventSwallow = true   //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
 
         // 首先要判断是否还有连接的空间
-        if (this.cur_Tower_Level <= LinesManager_Controller.Instance.ConnectionInfo2.getConnectionCount(this.OwnNodeName)) {
+        if (this.cur_Tower_Level <= LinesManager_Controller.Instance.getConnectionCount(this.OwnNodeName)) {
             // 如果没有空间了，不响应
             this.HasSpaceConnect = false;
             return;

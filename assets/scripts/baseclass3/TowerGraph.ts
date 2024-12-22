@@ -38,6 +38,11 @@ export class TowerGraph {
             : undefined;
     }
 
+    // 获取某节点作为起点，的连接数
+    getConnectionCount(towerName: string): number {
+        return this.adjacencyList.get(towerName)?.size ?? 0;
+    }
+
     // 删除一个塔
     removeTower(tower: string): void {
         if (this.adjacencyList.has(tower)) {
