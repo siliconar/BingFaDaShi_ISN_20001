@@ -31,9 +31,9 @@ export class LineArrow_Controller extends GObjectbase1 {
 
     readonly arrow_width: number = 180 + 15;  // 原始的箭头宽度
 
-    arrow_Image:Node = null;  // 承载整个箭头图像的Node
-    // arrow_head: Node = null;    // 箭头
-    // arrow_body: Node = null;    // 箭头
+    arrow_Image: Node = null;  // 承载整个箭头图像的Node
+    arrow_head: Node = null;    // 箭头
+    arrow_body: Node = null;    // 箭头
 
 
     local_collider: Collider2D = null; // 箭头尖尖的小碰撞体
@@ -54,7 +54,7 @@ export class LineArrow_Controller extends GObjectbase1 {
     protected onDestroy(): void {
         if (this.local_collider) {
             this.local_collider.off(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
-            // this.local_collider.off(Contact2DType.END_CONTACT, this.onEndContact, this);
+            this.local_collider.off(Contact2DType.END_CONTACT, this.onEndContact, this);
         }
     }
 
@@ -73,49 +73,68 @@ export class LineArrow_Controller extends GObjectbase1 {
         this.local_collider = this.getComponent(Collider2D);
         if (this.local_collider) {
             this.local_collider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
-            // this.local_collider.on(Contact2DType.END_CONTACT, this.onEndContact, this);
+            this.local_collider.on(Contact2DType.END_CONTACT, this.onEndContact, this);
         }
     }
 
     update(deltaTime: number) {
 
         // 如果真的需要绘制
-        if (this.bStartConnect)   
-        {
+        if (this.bStartConnect) {
 
-            // 如果锁住了，那么就画锁住的位置就行
-            let draw_endx:number;
-            let draw_endy:number;
-            if(this.block_end)
-            {
-                draw_endx = this.lock_endx
-                draw_endy = this.lock_endy
-            }
-            else
-            {
-                draw_endx = this.end_wx
-                draw_endy = this.end_wy
-            }
+            // // 如果锁住了，那么就画锁住的位置就行
+            // let draw_endx:number;
+            // let draw_endy:number;
+            // if(this.block_end)
+            // {
+            //     draw_endx = this.lock_endx
+            //     draw_endy = this.lock_endy
+            // }
+            // else
+            // {
+            //     draw_endx = this.end_wx
+            //     draw_endy = this.end_wy
+            // }
 
 
             // 绘图部分
-            if (this.previous_end_wx == draw_endx && this.previous_end_wy == draw_endy)  // 如果终点没变化，就不用绘图了
+            if (this.previous_end_wx == this.end_wx && this.previous_end_wy == this.lock_endy)  // 如果终点没变化，就不用绘图了
                 return
 
-            this.previous_end_wx = draw_endx
-            this.previous_end_wy = draw_endy
+            this.previous_end_wx = this.end_wx
+            this.previous_end_wy = this.end_wy
 
 
-            let dt_x = this.start_wx - draw_endx;
-            let dt_y = this.start_wy - draw_endy;
-            let tmpdist = Math.sqrt(dt_x * dt_x + dt_y * dt_y);  // 自此我们可以计算出宽度
+            // 记得还要绘制碰撞体
+            this.node.setWorldPosition(this.end_wx, this.end_wy, 0)
 
-            let angle = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
+            // 先绘制箭头
+            if (this.block_end)   // 如果是锁定了，那就绘制锁定位置
+            {
+                let dt_x = this.start_wx - this.lock_endx;
+                let dt_y = this.start_wy - this.lock_endy;
+                let tmpdist = Math.sqrt(dt_x * dt_x + dt_y * dt_y);  // 自此我们可以计算出宽度
 
-            this.arrow_Image.setWorldPosition(draw_endx, draw_endy, 0)
-            this.arrow_Image.setRotationFromEuler(0, 0, angle + 180)
-            this.arrow_body.setScale(tmpdist / this.arrow_width, 1, 1)
-            // console.log((draw_endx).toString()+"_"+(draw_endy).toString())
+                let angle = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
+
+                this.arrow_Image.setWorldPosition(this.lock_endx, this.lock_endy, 0)
+                this.arrow_Image.setRotationFromEuler(0, 0, angle + 180)
+                this.arrow_body.setScale(tmpdist / this.arrow_width, 1, 1)
+
+            }
+            else {
+                let dt_x = this.start_wx - this.end_wx;
+                let dt_y = this.start_wy - this.end_wy;
+                let tmpdist = Math.sqrt(dt_x * dt_x + dt_y * dt_y);  // 自此我们可以计算出宽度
+
+                let angle = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
+
+                this.arrow_Image.setWorldPosition(this.end_wx, this.end_wy, 0)
+                this.arrow_Image.setRotationFromEuler(0, 0, angle + 180)
+                this.arrow_body.setScale(tmpdist / this.arrow_width, 1, 1)
+                // console.log((this.end_wx).toString()+"_"+(this.end_wy).toString())
+            }
+
 
         }
     }
@@ -194,7 +213,7 @@ export class LineArrow_Controller extends GObjectbase1 {
         if (tower_com != null) {
 
             // 判断能不能碰撞
-            const bAllowConnect =  this.connecttower_name_List !== undefined && this.connecttower_name_List.indexOf(tower_com.OwnNodeName) !== -1;
+            const bAllowConnect = this.connecttower_name_List !== undefined && this.connecttower_name_List.indexOf(tower_com.OwnNodeName) !== -1;
 
             // 能碰撞就锁死 变蓝
             if (bAllowConnect) {
@@ -211,14 +230,14 @@ export class LineArrow_Controller extends GObjectbase1 {
 
     }
 
-    // 碰撞回调
-    // onEndContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
+    碰撞回调
+    onEndContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
 
-    //     // 箭头解锁
-    //     this._unlock_end();
-    //     // 箭头标红
-    //     this._ArrowColorRed();
-    // }
+        // 箭头解锁
+        this._unlock_end();
+        // 箭头标红
+        this._ArrowColorRed();
+    }
 
 
 
