@@ -23,7 +23,7 @@ export class TowerManager_Controller extends GObjectbase1 {
     towerGraph1: TowerGraph = new TowerGraph();   // 存储着所有塔的拓扑图，每个场景都不一样
     // 所有塔的注册
     Receiver_List: Map<string, TowerNode_Controller> = new Map<string, TowerNode_Controller>();
-
+ 
 
     //----  重载
     // 设置自己接受消息的类型
@@ -61,7 +61,7 @@ export class TowerManager_Controller extends GObjectbase1 {
         // 初始化塔拓扑图
         this._init_TowerGraph();
         // 帮助连接信息初始化一下。
-        this._init_Conn_Info();
+        // this._init_Conn_Info();
 
     }
 
@@ -78,19 +78,19 @@ export class TowerManager_Controller extends GObjectbase1 {
         }
     }
 
-    // 初始化所有的连接信息，这个函数由TowerManager调用
-    _init_Conn_Info() {
-        let conn_info = LinesManager_Controller.Instance.ConnectionInfo2;  // 连接信息
+    // // 初始化所有的连接信息，这个函数由TowerManager调用
+    // _init_Conn_Info() {
+    //     let conn_info = LinesManager_Controller.Instance.ConnectionInfo2;  // 连接信息
 
-        // 把所有的塔都注册进
-        for(const i_node of this.node.children)
-        {
-            const i_node_com = i_node.getComponent(TowerNode_Controller);
-            const towerA = new ConnectionNode(i_node_com.OwnNodeName, i_node.getWorldPosition().x, i_node.getWorldPosition().y);
-            conn_info.addTower(towerA)
-        }
+    //     // 把所有的塔都注册进
+    //     for(const i_node of this.node.children)
+    //     {
+    //         const i_node_com = i_node.getComponent(TowerNode_Controller);
+    //         const towerA = new ConnectionNode(i_node_com.OwnNodeName, i_node.getWorldPosition().x, i_node.getWorldPosition().y);
+    //         conn_info.addTower(towerA)
+    //     }
 
-    }
+    // }
 
 }
 
