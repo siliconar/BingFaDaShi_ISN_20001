@@ -80,6 +80,13 @@ export class TowerGraph {
             console.log(`${tower} is connected to: ${connectionList}`);
         }
     }
+
+    // 查询一个连接是否存在
+    hasConnection(tower1: string, tower2: string): boolean {
+        return this.adjacencyList.get(tower1)?.has(tower2) ?? false;
+    }
+
+
 }
 
 // 使用示例
