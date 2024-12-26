@@ -78,8 +78,6 @@ export class LinesManager_Controller extends GObjectbase1 {
         if(this.ConnectionInfo3.hasConnection(from_name,to_name))
             return
 
-        // 确定颜色，这事儿交给下级节点
-
 
         // 是否有管道？没有就新建一个
         if (!this.isTubeExist(from_name, to_name))   // 如果管道不存在
@@ -95,8 +93,8 @@ export class LinesManager_Controller extends GObjectbase1 {
             console.log("创建管道" + tubename)
         }
 
-        // 让管道建立连接图像
-        this.TubeList.get(Utils.generateUniqueString(from_name, to_name)).EstablishConnection(from_name, to_name)
+        // 让管道建立连接图像,调用Utils.generateUniqueString是为了自动生成一个名字
+        this.TubeList.get(Utils.generateUniqueString(from_name, to_name)).EstablishConnection(from_name, to_name)// 未完成，不能这么写
 
 
         // 如果toname是敌对塔
