@@ -68,7 +68,7 @@ export class LineTube_Controller extends Component {
         node_arrow.setWorldPosition(pos_to_x, pos_to_y, 0);
         node_arrow.getComponent(UITransform).width = tmpdist
 
-        let angle = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
+        const angle = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
         node_arrow.setRotationFromEuler(0, 0, angle)
         node_arrow.active = true;   // 激活箭头
 
@@ -103,20 +103,20 @@ export class LineTube_Controller extends Component {
         const pos_half_y = (pos_from_y + pos_to_y)/2;
 
         // 画箭头1
-        let node_arrow1 = this.node.children[colorID1];   // 找到对应箭头
+        const node_arrow1 = this.node.children[colorID1];   // 找到对应箭头
         node_arrow1.setWorldPosition(pos_half_x, pos_half_y, 0);
         node_arrow1.getComponent(UITransform).width = tmpdist/2;
 
-        let angle1 = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
+        const angle1 = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
         node_arrow1.setRotationFromEuler(0, 0, angle1)
         node_arrow1.active = true;   // 激活箭头
 
         // 画箭头2
-        let node_arrow2 = this.node.children[colorID2];   // 找到对应箭头
+        const node_arrow2 = this.node.children[colorID2];   // 找到对应箭头
         node_arrow2.setWorldPosition(pos_half_x, pos_half_y, 0);
         node_arrow2.getComponent(UITransform).width = tmpdist/2;
 
-        let angle2 = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
+        const angle2 = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
         node_arrow2.setRotationFromEuler(0, 0, angle2+180)
         node_arrow2.active = true;   // 激活箭头
 
