@@ -75,7 +75,7 @@ export class LinesManager_Controller extends GObjectbase1 {
         //--- 下面绘制图像
 
         // 判断管道中的链接是否已经存在 
-        if(this.ConnectionInfo3.hasConnection(from_name,to_name))
+        if (this.ConnectionInfo3.hasConnection(from_name, to_name))
             return
 
 
@@ -93,35 +93,58 @@ export class LinesManager_Controller extends GObjectbase1 {
             console.log("创建管道" + tubename)
         }
 
-        // 让管道建立连接图像,调用Utils.generateUniqueString是为了自动生成一个名字
-        this.TubeList.get(Utils.generateUniqueString(from_name, to_name)).EstablishConnection(from_name, to_name)// 未完成，不能这么写
-
-
-        // 如果toname是敌对塔
-        // 如果有反向的connection，那么就做对半路程
-
-        // 如果没有反向connection，那么直接全程链接过去
-
-        // 如果toname是自己方塔
-        // 如果有反向的connection，那么就删除原有的,然后直接全程连接过去
-        // 如果没有反向connection，那么直接全程链接过去
 
         //--- 数据表中，添加真实连接
-        // this.ConnectionInfo2.addConnection(from_name, to_name)
         this.ConnectionInfo3.addConnection(from_name, to_name)
+
+        //---- 让管道建立连接图像,
+        const cur_TubeScript = this.TubeList.get(Utils.generateUniqueString(from_name, to_name))
+
+        // 首先获取两个塔的party
+        const towerscript_from = TowerManager_Controller.Instance.GetTowerScript(from_name)
+        const towerscript_to = TowerManager_Controller.Instance.GetTowerScript(to_name)
+        if (towerscript_from == undefined || towerscript_to == undefined)   // 安全检查
+        {
+            console.error("from或to塔不存在, 严重错误")
+            return
+        }
+        const party_from = towerscript_from.cur_Party;   // 获取两个塔的party
+        const party_to = towerscript_to.cur_Party;      // 获取两个塔的party
+
+        // 如果有反向连接
+        if (this.ConnectionInfo3.hasConnection(to_name, from_name)) {
+            if (party_from == party_to)  // 如果是同一阵营，那么删除反向连接，重新构建一个
+            {
+                this.ConnectionInfo3.removeConnection(to_name, from_name)   // 删除反向连接
+                //管道建立连接图像, 调用Utils.generateUniqueString是为了自动生成一个名字
+                cur_TubeScript.ClearAllConnection()
+                cur_TubeScript.EstablishSingleConnection(from_name, to_name)    // 建立单向连接
+            }
+            else // 如果不是同一阵营,要建立双向连接
+            {
+                //管道建立连接图像, 调用Utils.generateUniqueString是为了自动生成一个名字
+                cur_TubeScript.ClearAllConnection()
+                cur_TubeScript.EstablishDoubleConnection(from_name, to_name)    // 建立双向连接
+            }
+        }
+        else // 如果没有反向连接，直接连过去就行
+        {
+            cur_TubeScript.EstablishSingleConnection(from_name, to_name)    // 建立单向连接
+        }
+
     }
 
 
-    // 删除一个单向连接
-    RemoveOneConnection(from_name: string, to_name: string) {
+    // // 删除一个单向连接
+    // RemoveOneConnection(from_name: string, to_name: string) {
 
 
-        // 让管道删除连接图像
-        this.TubeList.get(Utils.generateUniqueString(from_name, to_name)).DisConnection(from_name, to_name)
+    //     // 让管道删除连接图像
+    //     this.TubeList.get(Utils.generateUniqueString(from_name, to_name)).DisConnection(from_name, to_name)
 
-        // 数据表中，删除真实连接
-        this.ConnectionInfo3.removeConnection(from_name, to_name)
-    }
+    //     // 数据表中，删除真实连接
+    //     this.ConnectionInfo3.removeConnection(from_name, to_name)
+    // }
 
 
     // 获取某节点作为起点，的连接数
@@ -132,7 +155,7 @@ export class LinesManager_Controller extends GObjectbase1 {
     // 管道是否存在，注意，管道没有方向
     isTubeExist(name1: string, name2: string): boolean {
 
-        let tmpname = Utils.generateUniqueString(name1,name2)
+        let tmpname = Utils.generateUniqueString(name1, name2)
         return this.TubeList.has(tmpname)
     }
 
