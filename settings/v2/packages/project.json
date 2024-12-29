@@ -25,12 +25,18 @@
       {
         "index": 3,
         "name": "ConnectLine"
+      },
+      {
+        "index": 4,
+        "name": "testcollider"
       }
     ],
     "collisionMatrix": {
       "0": 1,
       "1": 4,
-      "2": 2
+      "2": 2,
+      "3": 16,
+      "4": 8
     }
   }
 }

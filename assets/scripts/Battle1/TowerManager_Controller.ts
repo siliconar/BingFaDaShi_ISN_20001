@@ -75,6 +75,7 @@ export class TowerManager_Controller extends GObjectbase1 {
         if ("Battle1" == this.BelongedSceneName) {
             this.towerGraph1.clearAll();  // 先清空一下
             this.towerGraph1.addConnection("TowerNode1", "TowerNode2")
+            this.towerGraph1.addConnection("TowerNode2", "TowerNode3")
         }
     }
 

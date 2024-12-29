@@ -1,4 +1,5 @@
-import { _decorator, Component, EventTouch, Node } from 'cc';
+import { _decorator, Component, ERaycast2DType, EventTouch, Node, PhysicsSystem2D, Vec2 } from 'cc';
+import { LinesManager_Controller } from './LinesManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('CancleLineNode_Controller')
@@ -28,6 +29,8 @@ export class CancleLineNode_Controller extends Component {
 
     private startx: number
     private starty: number
+    private endx: number
+    private endy: number
 
 
     start() {
@@ -35,61 +38,86 @@ export class CancleLineNode_Controller extends Component {
         this.canclelinenode = this.node.children[0];
     }
 
-    // update(deltaTime: number) {
+    update(deltaTime: number) {
 
-    // }
 
-        // 画cancle线
-        DrawCancleLine(startx: number, starty: number, endx: number, endy: number) {
 
-            const dt_x = startx - endx;
-            const dt_y = starty - endy;
-            const tmpdist = Math.sqrt(dt_x * dt_x + dt_y * dt_y);  // 自此我们可以计算出两个点距离
-    
-            const angle = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
-    
-    
-            this.canclelinenode.setWorldPosition(startx, starty, 0)
-            this.canclelinenode.setScale(tmpdist / this.origin_linewidth, 1, 1)
-            this.canclelinenode.setRotationFromEuler(0, 0, angle+180)
-    
-            this.canclelinenode.active = true;
-    
-    
+    }
+
+    // 画cancle线
+    DrawCancleLine(startx: number, starty: number, endx: number, endy: number) {
+
+        const dt_x = startx - endx;
+        const dt_y = starty - endy;
+        const tmpdist = Math.sqrt(dt_x * dt_x + dt_y * dt_y);  // 自此我们可以计算出两个点距离
+
+        const angle = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
+
+
+        this.canclelinenode.setWorldPosition(startx, starty, 0)
+        this.canclelinenode.setScale(tmpdist / this.origin_linewidth, 1, 1)
+        this.canclelinenode.setRotationFromEuler(0, 0, angle + 180)
+
+        this.canclelinenode.active = true;
+
+    }
+
+    // 取消cancle线
+    HideCancleLine() {
+        this.canclelinenode.active = false;
+    }
+
+
+    // 由touch消息调用
+    onCancleLineTouchStart(event: EventTouch) {
+        // event.preventSwallow = true   //如果要转发消息，用这个，放最后
+        this.startx = event.getUILocation().x
+        this.starty = event.getUILocation().y
+    }
+
+    // 由touch消息调用
+    onCancleLineTouchMove(event: EventTouch) {
+        // event.preventSwallow = true  //如果要转发消息，用这个，放最后
+        this.endx = Math.floor(event.getUILocation().x)
+        this.endy = Math.floor(event.getUILocation().y)
+
+        // 画Cancle line
+        this.DrawCancleLine(this.startx, this.starty, this.endx, this.endy)
+
+
+        // 发出射线，检测最近的那个
+        const ph2d = PhysicsSystem2D.instance;
+        const results = ph2d.raycast(new Vec2(this.startx, this.starty), new Vec2(this.endx, this.endy), ERaycast2DType.Closest, 0b01000)
+
+        if (results.length > 0)  // 如果的确监测到了
+        {
+            //通知那条线【变色】
+            LinesManager_Controller.Instance.ChangeColor_Tube(results[0].collider.node.parent.name);
         }
-    
-        // 取消cancle线
-        HideCancleLine() {
-            this.canclelinenode.active = false;
+        else {
+            // 通知所有线【取消变色】
+            LinesManager_Controller.Instance.StopChangeColor_Tube()
         }
-    
-    
-        // 由touch消息调用
-        onCancleLineTouchStart(event: EventTouch) {
-            // event.preventSwallow = true   //如果要转发消息，用这个，放最后
-            this.startx = event.getUILocation().x
-            this.starty = event.getUILocation().y
-        }
-    
-        // 由touch消息调用
-        onCancleLineTouchMove(event: EventTouch) {
-            // event.preventSwallow = true  //如果要转发消息，用这个，放最后
-            const tx = event.getUILocation().x
-            const ty = event.getUILocation().y
-    
-            this.DrawCancleLine(this.startx,this.starty,Math.floor(tx),Math.floor(ty))
-        }
-    
-        // 由touch消息调用
-        onCancleLineTouchEnd(event: EventTouch) {
-            this.HideCancleLine()
-        }
-    
-        // 由touch消息调用
-        onCancleLineTouchCancel(event: EventTouch) {
-            this.HideCancleLine()
-        }
-    
+    }
+
+    // 由touch消息调用
+    onCancleLineTouchEnd(event: EventTouch) {
+        this.HideCancleLine()
+
+        // 删除对应的线
+        LinesManager_Controller.Instance.RemoveConnection(未完成)
+
+    }
+
+    // 由touch消息调用
+    onCancleLineTouchCancel(event: EventTouch) {
+        this.HideCancleLine()
+        // 通知所有线【取消变色】
+        LinesManager_Controller.Instance.StopChangeColor_Tube()
+
+        未完成
+    }
+
 
 }
 

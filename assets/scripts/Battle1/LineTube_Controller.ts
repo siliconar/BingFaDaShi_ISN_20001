@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, UITransform } from 'cc';
+import { _decorator, Animation, BoxCollider2D, Collider2D, Component, Node, Size, UITransform, Vec2 } from 'cc';
 import { TowerGraph } from '../baseclass3/TowerGraph';
 import { TowerManager_Controller } from './TowerManager_Controller';
 const { ccclass, property } = _decorator;
@@ -17,8 +17,13 @@ export class LineTube_Controller extends Component {
     //---- 变量
     // private local_graph1: TowerGraph = new TowerGraph(true);    // 记录管道中的连接,有向图
 
-    private origin_arrow_length = 23;   // 箭头最开始宽度
+    private origin_arrow_length:number = 23;   // 箭头最开始宽度
 
+    // 两个塔的名称
+    Tower1name:string;
+    Tower1PartyID:number;
+    Tower2name:string;
+    Tower2PartyID:number;
     //---- 重载
 
 
@@ -33,6 +38,17 @@ export class LineTube_Controller extends Component {
 
     update(deltaTime: number) {
 
+    }
+
+
+
+    Init(tower1name:string, tower2name:string)
+    {
+        this.Tower1name = tower1name
+        this.Tower2name = tower2name
+        // 确立party
+        this.Tower1PartyID = TowerManager_Controller.Instance.GetTowerScript(tower1name).cur_Party;
+        this.Tower2PartyID = TowerManager_Controller.Instance.GetTowerScript(tower2name).cur_Party;
     }
 
 
@@ -60,18 +76,12 @@ export class LineTube_Controller extends Component {
         const dt_x = pos_from_x - pos_to_x;
         const dt_y = pos_from_y - pos_to_y;
         const tmpdist = Math.sqrt(dt_x * dt_x + dt_y * dt_y);  // 自此我们可以计算出两个塔距离
-
+        const angle = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
 
         // 画箭头
-
-        let node_arrow = this.node.children[colorID];   // 找到对应箭头
-        node_arrow.setWorldPosition(pos_to_x, pos_to_y, 0);
-        node_arrow.getComponent(UITransform).width = tmpdist
-
-        const angle = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
-        node_arrow.setRotationFromEuler(0, 0, angle)
-        node_arrow.active = true;   // 激活箭头
-
+        this._paint_connection(colorID, pos_to_x, pos_to_y, tmpdist, angle)
+        // // 内部有向图中添加连接，为了删除的时候好查询
+        // this.local_graph1.addConnection(from_name, to_name)
     }
 
     // 建立一个双向连接
@@ -99,26 +109,33 @@ export class LineTube_Controller extends Component {
         const dt_y = pos_from_y - pos_to_y;
         const tmpdist = Math.sqrt(dt_x * dt_x + dt_y * dt_y);  // 自此我们可以计算出两个塔距离
 
-        const pos_half_x = (pos_from_x + pos_to_x)/2;
-        const pos_half_y = (pos_from_y + pos_to_y)/2;
-
-        // 画箭头1
-        const node_arrow1 = this.node.children[colorID1];   // 找到对应箭头
-        node_arrow1.setWorldPosition(pos_half_x, pos_half_y, 0);
-        node_arrow1.getComponent(UITransform).width = tmpdist/2;
+        const pos_half_x = (pos_from_x + pos_to_x) / 2;         // 两条线只能划到一半
+        const pos_half_y = (pos_from_y + pos_to_y) / 2;         // 两条线只能划到一半
 
         const angle1 = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
-        node_arrow1.setRotationFromEuler(0, 0, angle1)
-        node_arrow1.active = true;   // 激活箭头
+        const angle2 = Math.atan2(dt_y, dt_x) * 180 / Math.PI + 180;
 
-        // 画箭头2
-        const node_arrow2 = this.node.children[colorID2];   // 找到对应箭头
-        node_arrow2.setWorldPosition(pos_half_x, pos_half_y, 0);
-        node_arrow2.getComponent(UITransform).width = tmpdist/2;
+        // 画箭头1 from
+        if (party_from == 1)  // 如果是玩家阵营，记住，箭头需要画到头,这么做是为了方便玩家cancle
+        {
+            this._paint_connection(colorID1, pos_to_x, pos_to_y, tmpdist, angle1)
+        }
+        else {
+            this._paint_connection(colorID1, pos_half_x, pos_half_y, tmpdist / 2, angle1)
+        }
 
-        const angle2 = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
-        node_arrow2.setRotationFromEuler(0, 0, angle2+180)
-        node_arrow2.active = true;   // 激活箭头
+        // 画箭头2 to
+        if (party_to == 1)   // 如果是玩家阵营，记住，箭头需要画到头,这么做是为了方便玩家cancle
+        {
+            this._paint_connection(colorID2, pos_from_x, pos_from_y, tmpdist, angle2)
+        }
+        else {
+            this._paint_connection(colorID2, pos_half_x, pos_half_y, tmpdist / 2, angle2)
+        }
+
+        // // 内部有向图中添加连接，为了删除的时候好查询
+        // this.local_graph1.addConnection(from_name, to_name)
+        // this.local_graph1.addConnection(to_name, from_name)
 
     }
 
@@ -127,80 +144,40 @@ export class LineTube_Controller extends Component {
     ClearAllConnection() {
         for (const ichild of this.node.children)
             ichild.active = false;
+
+        // // 内部有向图中删除连接，为了删除的时候好查询
+        // this.local_graph1.clearAll()
     }
 
-    // // 让管道建立一个有向连接
-    // EstablishConnection(from_name: string, to_name: string) {
-    //     // 判断这个连接是否存在
-    //     if (this.local_graph1.hasConnection(from_name, to_name))
-    //         return;
+    // 依据party，隐藏某个连接
+    ClearConnectionByParty(partyID: number) {
+        const colorID = this._get_line_ColorID(partyID);  // 找到玩家箭头
+        const playernode_arrow = this.node.children[colorID];
+        if (partyID == 1)  // 如果是玩家
+            this.StopChangeColor_playerLine()   // 停止变色
+        playernode_arrow.active = false;
 
-    //     // 连接不存在，那么建立连接
-    //     // 确立连接线的颜色
-    //     const towerscript_from = TowerManager_Controller.Instance.GetTowerScript(from_name)
-    //     const towerscript_to = TowerManager_Controller.Instance.GetTowerScript(to_name)
-    //     if (towerscript_from == undefined || towerscript_to == undefined)   // 安全检查
-    //     {
-    //         console.error("from或to塔不存在, 严重错误")
-    //         return
-    //     }
-    //     const party_from = towerscript_from.cur_Party;   // 获取两个塔的party
-    //     const party_to = towerscript_to.cur_Party;      // 获取两个塔的party
+    }
 
-    //     const colorID = this._get_line_ColorID(party_from)  // 获取线的颜色，colorID对应child编号
+    // 画箭头1个
+    private _paint_connection(colorID: number, pos_to_x: number, pos_to_y: number, dist1: number, angle1: number) {
+        // 画箭头
+        const node_arrow = this.node.children[colorID];   // 找到对应箭头
+        node_arrow.setWorldPosition(pos_to_x, pos_to_y, 0);
+        node_arrow.getComponent(UITransform).width = dist1
 
-    //     // 起始和终止点的世界坐标
-    //     const pos_from_x = towerscript_from.node.getWorldPosition().x;
-    //     const pos_from_y = towerscript_from.node.getWorldPosition().y;
-    //     const pos_to_x = towerscript_to.node.getWorldPosition().x;
-    //     const pos_to_y = towerscript_to.node.getWorldPosition().y;
+        node_arrow.setRotationFromEuler(0, 0, angle1)
 
-    //     const dt_x = pos_from_x - pos_to_x;
-    //     const dt_y = pos_from_y - pos_to_y;
-    //     const tmpdist = Math.sqrt(dt_x * dt_x + dt_y * dt_y);  // 自此我们可以计算出两个塔距离
-
-    //     // 是否有反方向的连接
-    //     let isReverseConnection = this.local_graph1.hasConnection(to_name, from_name)
-
-    //     // 如果两个塔都是同一阵营
-    //     if (party_from == party_to) {
-
-    //         // 如果有反向连接，删除反向连接，然后直接画箭头过去
-    //         if (isReverseConnection) {
-    //             // 删除反向连接
-    //             // 注意，我们这里不用 this.DisConnection(to_name,from_name) 来删除
-    //             // 因为我们不需要把图像关闭，只需要把原来的箭头调转方向就行。
-    //             // 同时我们要在local_graph1中删除链接
-    //             this.local_graph1.removeConnection(to_name, from_name);
-    //         }
-    //         // 画箭头和下面一起画
-    //         // 如果没有反向连接，直接画图箭头过去就行
-    //         // 画箭头
-
-    //         let node_arrow = this.node.children[colorID];
-    //         node_arrow.setWorldPosition(pos_to_x, pos_to_y, 0);
-    //         node_arrow.getComponent(UITransform).width = tmpdist
-
-    //         let angle = Math.atan2(dt_y, dt_x) * 180 / Math.PI;
-    //         node_arrow.setRotationFromEuler(0, 0, angle)
-    //         node_arrow.active = true;
+        // 如果是玩家阵营，记住，tmd还得变化collider
+        if (colorID == 0) {
+            const collider_size = node_arrow.getComponent(BoxCollider2D).size
+            node_arrow.getComponent(BoxCollider2D).size = new Size(dist1, collider_size.height)
+            node_arrow.getComponent(BoxCollider2D).offset = new Vec2(dist1 / 2, 0)
+        }
 
 
-    //     }
-
-
-    //     // 未完成
-
-
-    //     this.local_graph1.addConnection(from_name, to_name)  // 添加局部有向图的记录
-    //     console.log("管道建立连接" + from_name + " -> " + to_name)
-    // }
-
-    // // 让管道删除一个有向连接
-    // DisConnection(from_name: string, to_name: string) {
-    //     console.log("管道删除连接" + from_name + " -> " + to_name)
-    // }
-
+        node_arrow.active = true;   // 激活箭头
+    }
 
     // 获取管道里，一条线的颜色ID，ID对应child编号
     private _get_line_ColorID(partyID: number): number {
@@ -217,6 +194,34 @@ export class LineTube_Controller extends Component {
         }
     }
 
+
+    // 让玩家的那条线变色
+    ChangeColor_playerLine() {
+        const colorID = this._get_line_ColorID(1);  // 找到玩家箭头
+        const node_arrow = this.node.children[colorID];
+
+        if (node_arrow.active == true)  // 如果激活了，那就变色
+        {
+            node_arrow.getComponent(Animation).play()
+        }
+    }
+
+    // 停止变色
+    StopChangeColor_playerLine() {
+        // console.log(this.node.name +"取消变色")
+        const colorID = this._get_line_ColorID(1);  // 找到玩家箭头
+        const node_arrow = this.node.children[colorID];
+
+        if (node_arrow.active == true)  // 如果激活了，那就变色
+        {
+            const animation1 = node_arrow.getComponent(Animation)
+            animation1.stop()
+            const animState = animation1.getState("line_connect_changecolor");
+            animState.time = 0
+            animState.sample()
+            console.log("停止变色")
+        }
+    }
 
 }
 
