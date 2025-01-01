@@ -23,6 +23,11 @@ export class TowerNode_Controller extends GObjectbase1 {
     Arrow: Node = null;
 
 
+    @property
+    Interval_Soidier:number = 3;   // 出兵间隔
+    cur_invtime:number = 0;            // 当前的时间间隔
+
+
     cur_ActiveTowerID = 0;          // 当前激活的塔图片的编号
     child_label: Label = null;      // 塔上的数字
 
@@ -64,6 +69,24 @@ export class TowerNode_Controller extends GObjectbase1 {
 
     update(deltaTime: number) {
 
+        // 时间迭代
+        this.cur_invtime+=deltaTime
+
+        // 如果到了出兵的时间
+        if(this.cur_invtime > this.Interval_Soidier)
+        {
+            this.cur_invtime =0;
+
+            //--- 出兵
+
+            // 判断用什么兵种
+            const soldierID = this._getCurSoldierID()
+            
+
+            //
+
+
+        }
     }
 
     // 重载
@@ -111,6 +134,7 @@ export class TowerNode_Controller extends GObjectbase1 {
         this.node.children[id_child].active = true;  // 激活要显示的塔的显示
         this.cur_ActiveTowerID = id_child;
     }
+
 
 
     // 替换数字
@@ -178,6 +202,14 @@ export class TowerNode_Controller extends GObjectbase1 {
         DrawLineMaskManager_Controller2.Instance.arrow_Script.StopDraw()
     }
 
+
+
+
+    // 判断用什么兵种
+    private _getCurSoldierID():number
+    {
+        return 0;
+    }
 
 }
 

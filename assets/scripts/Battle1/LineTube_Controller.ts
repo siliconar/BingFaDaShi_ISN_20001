@@ -80,8 +80,11 @@ export class LineTube_Controller extends Component {
 
         // 画箭头
         this._paint_connection(colorID, pos_to_x, pos_to_y, tmpdist, angle)
-        // // 内部有向图中添加连接，为了删除的时候好查询
-        // this.local_graph1.addConnection(from_name, to_name)
+
+        if(party_from == 1)  // 如果是玩家，记得暂停变色
+        {
+            this.StopChangeColor_playerLine()
+        }
     }
 
     // 建立一个双向连接
@@ -119,6 +122,7 @@ export class LineTube_Controller extends Component {
         if (party_from == 1)  // 如果是玩家阵营，记住，箭头需要画到头,这么做是为了方便玩家cancle
         {
             this._paint_connection(colorID1, pos_to_x, pos_to_y, tmpdist, angle1)
+            this.StopChangeColor_playerLine()   // 玩家阵营一定要暂停变色
         }
         else {
             this._paint_connection(colorID1, pos_half_x, pos_half_y, tmpdist / 2, angle1)
@@ -128,6 +132,7 @@ export class LineTube_Controller extends Component {
         if (party_to == 1)   // 如果是玩家阵营，记住，箭头需要画到头,这么做是为了方便玩家cancle
         {
             this._paint_connection(colorID2, pos_from_x, pos_from_y, tmpdist, angle2)
+            this.StopChangeColor_playerLine()   // 玩家阵营一定要暂停变色
         }
         else {
             this._paint_connection(colorID2, pos_half_x, pos_half_y, tmpdist / 2, angle2)
@@ -150,14 +155,14 @@ export class LineTube_Controller extends Component {
     }
 
     // 依据party，隐藏某个连接
-    ClearConnectionByParty(partyID: number) {
-        const colorID = this._get_line_ColorID(partyID);  // 找到玩家箭头
-        const playernode_arrow = this.node.children[colorID];
-        if (partyID == 1)  // 如果是玩家
-            this.StopChangeColor_playerLine()   // 停止变色
-        playernode_arrow.active = false;
+    // ClearConnectionByParty(partyID: number) {
+    //     const colorID = this._get_line_ColorID(partyID);  // 找到玩家箭头
+    //     const playernode_arrow = this.node.children[colorID];
+    //     if (partyID == 1)  // 如果是玩家
+    //         this.StopChangeColor_playerLine()   // 停止变色
+    //     playernode_arrow.active = false;
 
-    }
+    // }
 
     // 画箭头1个
     private _paint_connection(colorID: number, pos_to_x: number, pos_to_y: number, dist1: number, angle1: number) {
@@ -212,7 +217,7 @@ export class LineTube_Controller extends Component {
         const colorID = this._get_line_ColorID(1);  // 找到玩家箭头
         const node_arrow = this.node.children[colorID];
 
-        if (node_arrow.active == true)  // 如果激活了，那就变色
+        if (node_arrow.active == true)  // 如果激活了，那就停止变色
         {
             const animation1 = node_arrow.getComponent(Animation)
             animation1.stop()

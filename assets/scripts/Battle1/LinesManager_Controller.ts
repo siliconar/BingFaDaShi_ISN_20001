@@ -151,6 +151,51 @@ export class LinesManager_Controller extends GObjectbase1 {
 
 
 
+    // 删除连接
+
+    RemoveConnection_by_tubename_party(tubename: string, partyID: number) {
+
+        const tubescript = this.TubeList.get(tubename)
+        const tower1name = tubescript.Tower1name;
+        const tower2name = tubescript.Tower2name;
+        const tower1PartyID = tubescript.Tower1PartyID;
+        const tower2PartyID = tubescript.Tower2PartyID;
+
+
+        // 未完成，这个逻辑不对，不能仅仅判断partyID，应当从connectionInfo判断
+        if(tower1PartyID == partyID &&this.ConnectionInfo3.hasConnection(tower1name,tower2name)) // 如果要删除的是从Tower1出发的线
+        {
+            tubescript.ClearAllConnection()  // 先把图像都删除，不管是不是有两条线
+            if(this.ConnectionInfo3.hasConnection(tower2name,tower1name))  // 如果本来就有反向的连接
+            {
+                tubescript.EstablishSingleConnection(tower2name,tower1name)
+            }
+            this.ConnectionInfo3.removeConnection(tower1name, tower2name)   // 数据表中，删除真实连接
+        }
+        else if(tower2PartyID == partyID && this.ConnectionInfo3.hasConnection(tower2name,tower1name)) // 如果要删除的是从Tower2出发的线
+        {
+            tubescript.ClearAllConnection()  // 先把图像都删除，不管是不是有两条线
+            if(this.ConnectionInfo3.hasConnection(tower1name,tower2name))  // 如果本来就有反向的连接
+            {
+                tubescript.EstablishSingleConnection(tower1name,tower2name)
+            }
+            this.ConnectionInfo3.removeConnection(tower2name, tower1name)   // 数据表中，删除真实连接
+        }
+        else
+        {
+            console.error("RemoveConnection中,"+tubename+"不含有partyID")
+        }
+
+        if(partyID ==1)
+            this.cur_changecolor_name = ""
+
+
+        // 测试，打印
+        // this.ConnectionInfo3.printGraph()
+
+    }
+
+
 
     // 获取某节点作为起点，的连接数
     getConnectionCount(towername: string): number {
@@ -165,8 +210,7 @@ export class LinesManager_Controller extends GObjectbase1 {
     }
 
 
-    // 通知tube，让某一条玩家的线变色
-    // last_changecolor_name:string = "";   // 上一个变色的tube
+    // 通知tube，让某一条玩家的线变色,只对player有效
     cur_changecolor_name: string = "";       // 当前变色的tube
     ChangeColor_Tube(tubename: string) {
         if (this.cur_changecolor_name == tubename)   // 如果已经变色了，那么返回，不要重复执行
@@ -178,7 +222,7 @@ export class LinesManager_Controller extends GObjectbase1 {
         this.cur_changecolor_name = tubename;   // 记录下当前变色的tube
     }
 
-    // 通知tube，停止变色
+    // 通知tube，停止变色,只对player有效
     StopChangeColor_Tube() {
         if (this.cur_changecolor_name == "")   // 如果目前没有变色的tube
             return;
@@ -186,36 +230,6 @@ export class LinesManager_Controller extends GObjectbase1 {
         this.TubeList.get(this.cur_changecolor_name).StopChangeColor_playerLine()   // 取消变色
         this.cur_changecolor_name = "";
     }
-
-    // 通过当前cur_changecolor_name来删除连接
-    RemoveConnection_By_ChangeColorName() {
-        if (this.cur_changecolor_name == "")   // 如果目前没有变色的tube
-            return;
-    }
-
-    // 删除连接
-    RemoveConnection(tubename: string, partyID: number) {
-
-        const tubescript = this.TubeList.get(this.cur_changecolor_name)
-        // 让管道删除连接图像
-        tubescript.ClearConnectionByParty(partyID)
-        // 数据表中，删除真实连接
-        if(tubescript.Tower1PartyID == partyID)  // 看看tube中，哪个塔是这个partyID
-            this.ConnectionInfo3.removeConnection(tubescript.Tower1name, tubescript.Tower2name)
-        else if(tubescript.Tower2PartyID == partyID)
-            this.ConnectionInfo3.removeConnection(tubescript.Tower2name, tubescript.Tower1name)
-        else
-            console.error("RemoveConnection中,"+tubename+"不含有partyID")
-
-
-        // 如果是玩家，那么还有清空变色的tube
-        // 判断的原因是，第一，如果不清空，后面会异常变色
-        // 第二个原因是，防止AI把玩家的变色给清除了
-        if (partyID == 1) {
-            this.cur_changecolor_name = "";
-        }
-    }
-
 }
 
 

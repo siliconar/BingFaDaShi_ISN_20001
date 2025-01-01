@@ -2446,6 +2446,7 @@
     "Arrow": {
       "__id__": 61
     },
+    "Interval_Soidier": 3,
     "_id": "1bxpinwSlGTq/5Oj0uXhv4"
   },
   {
@@ -3609,6 +3610,7 @@
     "Arrow": {
       "__id__": 93
     },
+    "Interval_Soidier": 3,
     "_id": "02/SWG1BVGkIohxClYKahN"
   },
   {
@@ -4767,11 +4769,12 @@
     "_enabled": true,
     "__prefab": null,
     "cur_soldier_cnt": 20,
-    "cur_Tower_Level": 3,
+    "cur_Tower_Level": 1,
     "cur_Party": 1,
     "Arrow": {
       "__id__": 125
     },
+    "Interval_Soidier": 3,
     "_id": "40I2GBj1lJdKd8DKshazdM"
   },
   {

@@ -105,17 +105,24 @@ export class CancleLineNode_Controller extends Component {
         this.HideCancleLine()
 
         // 删除对应的线
-        LinesManager_Controller.Instance.RemoveConnection(未完成)
+        const cur_changecolor_name = LinesManager_Controller.Instance.cur_changecolor_name
+        if (cur_changecolor_name != "") // 如果的确有线要删除
+        {
+            LinesManager_Controller.Instance.RemoveConnection_by_tubename_party(cur_changecolor_name , 1)
+        }
 
     }
 
     // 由touch消息调用
     onCancleLineTouchCancel(event: EventTouch) {
         this.HideCancleLine()
-        // 通知所有线【取消变色】
-        LinesManager_Controller.Instance.StopChangeColor_Tube()
 
-        未完成
+        // 删除对应的线
+        const cur_changecolor_name = LinesManager_Controller.Instance.cur_changecolor_name
+        if (cur_changecolor_name != "") // 如果的确有线要删除
+        {
+            LinesManager_Controller.Instance.RemoveConnection_by_tubename_party(cur_changecolor_name , 1)
+        }
     }
 
 
