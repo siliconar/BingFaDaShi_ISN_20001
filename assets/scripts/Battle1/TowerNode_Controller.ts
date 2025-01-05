@@ -83,8 +83,18 @@ export class TowerNode_Controller extends GObjectbase1 {
             const soldierID = this._getCurSoldierID()
             
 
-            //
+            // 迭代每个connection，出兵
+            // for()
+            // {
+            //     // 建设兵
 
+            //     // 扣数量 未完成
+
+            //     // 挂节点
+
+            //     // 设置动画   
+            //     // 设置行动，出发
+            // }
 
         }
     }
@@ -208,6 +218,7 @@ export class TowerNode_Controller extends GObjectbase1 {
     // 判断用什么兵种
     private _getCurSoldierID():number
     {
+        // 未完成,后续完成
         return 0;
     }
 
