@@ -6622,7 +6622,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "playOnLoad": false,
+    "playOnLoad": true,
     "_clips": [
       {
         "__uuid__": "60b5b33d-6449-486d-b82f-dea58980f265",
@@ -6757,7 +6757,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "playOnLoad": false,
+    "playOnLoad": true,
     "_clips": [
       {
         "__uuid__": "39b95c3a-de31-4a92-b19e-865e0c896a1b",

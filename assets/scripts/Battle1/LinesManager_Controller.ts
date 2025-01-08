@@ -162,7 +162,7 @@ export class LinesManager_Controller extends GObjectbase1 {
         const tower2PartyID = tubescript.Tower2PartyID;
 
 
-        // 未完成，这个逻辑不对，不能仅仅判断partyID，应当从connectionInfo判断
+        // 判断
         if(tower1PartyID == partyID &&this.ConnectionInfo3.hasConnection(tower1name,tower2name)) // 如果要删除的是从Tower1出发的线
         {
             tubescript.ClearAllConnection()  // 先把图像都删除，不管是不是有两条线
