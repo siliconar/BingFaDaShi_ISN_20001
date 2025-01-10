@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, math, Node, NodeEventType, Sprite, input, Input, EventTouch } from 'cc';
+import { _decorator, Component, Label, math, Node, NodeEventType, Sprite, input, Input, EventTouch, Vec3 } from 'cc';
 import { GObjectbase1 } from '../baseclass3/GObjectbase1';
 import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
@@ -24,8 +24,8 @@ export class TowerNode_Controller extends GObjectbase1 {
 
 
     @property
-    Interval_Soidier:number = 3;   // 出兵间隔
-    cur_invtime:number = 0;            // 当前的时间间隔
+    Interval_Soidier: number = 3;   // 出兵间隔
+    cur_invtime: number = 0;            // 当前的时间间隔
 
 
     cur_ActiveTowerID = 0;          // 当前激活的塔图片的编号
@@ -50,6 +50,28 @@ export class TowerNode_Controller extends GObjectbase1 {
         this.node.off(Node.EventType.TOUCH_CANCEL, this.onTowerTouchCancel, this)
     }
 
+
+    // 重载
+    // 设置自己接受消息的类型
+    _setOwnNodeName(): string {
+        return this.node.name  // 塔node，使用自己的名称注册
+    }
+
+    // 处理消息
+    _processMessage(msg: Message3) {
+        // cmd =1 该单个塔节点执行箭头, Content= bool 开关
+
+        if (1 == msg.Command) // md =1 该单个塔节点执行箭头, Content= bool 开关
+        {
+            let bshow = msg.Content;
+            this.ShowArrow(bshow)
+        }
+
+
+    }
+
+
+
     start() {
         // 注册messagecenter
         MessageCenter3.getInstance(this.BelongedSceneName).RegisterReceiver(this.OwnNodeName, this);
@@ -69,53 +91,66 @@ export class TowerNode_Controller extends GObjectbase1 {
 
     update(deltaTime: number) {
 
+
+        // 中立不出兵
+        if (this.cur_Party == 0)
+            return;
+
         // 时间迭代
-        this.cur_invtime+=deltaTime
+        this.cur_invtime += deltaTime
 
         // 如果到了出兵的时间
-        if(this.cur_invtime > this.Interval_Soidier)
-        {
-            this.cur_invtime =0;
+        if (this.cur_invtime > this.Interval_Soidier) {
+            this.cur_invtime = 0;
 
             //--- 出兵
 
+
+            // 计算自己可以出几个兵
+            let cnt_GenSoldier = this.cur_Tower_Level;
+
             // 判断用什么兵种
             const soldierID = this._getCurSoldierID()
-            
+
+
 
             // 迭代每个connection，出兵
-            // for()
-            // {
-            //     // 建设兵
+            const conn_str_vec = LinesManager_Controller.Instance.getConnections(this.OwnNodeName)  // 获取这个塔有哪些连接
+            if (conn_str_vec != undefined) {
+                for (const i_conn of conn_str_vec) {
 
-            //     // 扣数量 未完成
+                    const world_startpos = this.node.getWorldPosition();
+                    const world_endpos = TowerManager_Controller.Instance.GetTowerScript(i_conn).node.getWorldPosition();
+                    this.GenNewSoldier(soldierID, this.cur_Party, world_startpos,world_endpos, this.OwnNodeName, i_conn);   // 生产士兵
+                    cnt_GenSoldier--;
+                }
+            }
 
-            //     // 挂节点
-
-            //     // 设置动画   
-            //     // 设置行动，出发
-            // }
+            // 剩余的兵回归自身
+            if (cnt_GenSoldier>0)
+            {
+                this.cur_soldier_cnt+=cnt_GenSoldier; 
+                this.ChangeLabel(this.cur_soldier_cnt);  // 记得更改标签
+                cnt_GenSoldier = 0;
+            }
+            else if (cnt_GenSoldier<0)
+            {
+                console.error("不应该出现这个, 说明connection的数量过多了")
+            }
 
         }
     }
 
-    // 重载
-    // 设置自己接受消息的类型
-    _setOwnNodeName(): string {
-        return this.node.name  // 塔node，使用自己的名称注册
-    }
+    // 生产一个兵(士兵id，阵营，起点，终点, 所属塔，攻击塔)
+    GenNewSoldier(soldierid: number, partyid: number, world_startpos: Vec3, world_endpos: Vec3, fromTowername: string, toTowername: string) {
+              // 建设兵
 
-    // 处理消息
-    _processMessage(msg: Message3) {
-        // cmd =1 该单个塔节点执行箭头, Content= bool 开关
+                    // 扣数量 未完成
 
-        if (1 == msg.Command) // md =1 该单个塔节点执行箭头, Content= bool 开关
-        {
-            let bshow = msg.Content;
-            this.ShowArrow(bshow)
-        }
+                    // 挂节点
 
-
+                    // 设置动画   
+                    // 设置行动，出发
     }
 
 
@@ -216,8 +251,7 @@ export class TowerNode_Controller extends GObjectbase1 {
 
 
     // 判断用什么兵种
-    private _getCurSoldierID():number
-    {
+    private _getCurSoldierID(): number {
         // 未完成,后续完成
         return 0;
     }

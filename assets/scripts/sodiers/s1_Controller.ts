@@ -16,12 +16,16 @@ export class s1_Controller extends Component implements interface_soldierbatter 
     @property
     Defend: number = 1
 
+    //---- 内部变量
+    soldier_party: number = 0   // 士兵的阵营 1自己 0中立  -1无
+
+
+    //--- 接口interface_soldierbatter变量
+    nameID: string;
+    cur_health: number;
 
 
 
-
-
-    soldier_party: number = 0
 
     // 吸血
 
@@ -47,17 +51,14 @@ export class s1_Controller extends Component implements interface_soldierbatter 
 
     }
 
-
-
-    nameID: string;
-    cur_health: number;
+    // --- 接口interface_soldierbatter函数
     attack(): number {
         // 吸血攻击逻辑
         return Math.floor(Math.random() * 8) + 8; // 随机伤害 8-16
     }
 
     takeDamage(damage: number): void {
-        this.health -= damage;
+        // this.health -= damage;
     }
 
 

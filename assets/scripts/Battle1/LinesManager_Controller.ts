@@ -202,6 +202,16 @@ export class LinesManager_Controller extends GObjectbase1 {
         return this.ConnectionInfo3.getConnectionCount(towername)
     }
 
+
+    // 获取某节点作为起点，的连接，注意不是连接数
+    getConnections(towername:string):string[]
+    {
+        return this.ConnectionInfo3.getConnections(towername)
+    }
+
+
+
+
     // 管道是否存在，注意，管道没有方向
     isTubeExist(name1: string, name2: string): boolean {
 
