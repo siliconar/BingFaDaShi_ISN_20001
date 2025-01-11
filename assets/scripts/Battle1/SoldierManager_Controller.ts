@@ -1,7 +1,8 @@
-import { _decorator, Component, Node, Prefab } from 'cc';
+import { _decorator, Collider2D, Component, Contact2DType, IPhysics2DContact, Node, Prefab } from 'cc';
 import { GObjectbase1 } from '../baseclass3/GObjectbase1';
 import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
+import { TowerNode_Controller } from './TowerNode_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('SoldierManager_Controller')
@@ -42,14 +43,15 @@ export class SoldierManager_Controller extends GObjectbase1 {
 
         // 注册messagecenter
         MessageCenter3.getInstance(this.BelongedSceneName).RegisterReceiver(this.OwnNodeName, this);
-
-
-
     }
 
     // update(deltaTime: number) {
-        
+
     // }
+
+
+
+
 }
 
 

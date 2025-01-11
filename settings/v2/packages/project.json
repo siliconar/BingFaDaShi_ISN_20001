@@ -29,14 +29,19 @@
       {
         "index": 4,
         "name": "testcollider"
+      },
+      {
+        "index": 5,
+        "name": "SOLDIER"
       }
     ],
     "collisionMatrix": {
       "0": 1,
       "1": 4,
-      "2": 2,
+      "2": 34,
       "3": 16,
-      "4": 8
+      "4": 8,
+      "5": 36
     }
   }
 }
