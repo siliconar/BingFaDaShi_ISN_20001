@@ -5,6 +5,7 @@ import { MessageCenter3 } from '../baseclass3/MessageCenter3';
 import { DrawLineMaskManager_Controller2 } from './DrawLineMaskManager_Controller2';
 import { LinesManager_Controller } from './LinesManager_Controller';
 import { TowerManager_Controller } from './TowerManager_Controller';
+import { ArmyCatalogManager_Controller } from '../sodiers/ArmyCatalogManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('TowerNode_Controller')
@@ -119,9 +120,12 @@ export class TowerNode_Controller extends GObjectbase1 {
             if (conn_str_vec != undefined) {
                 for (const i_conn of conn_str_vec) {
 
+                    // 判断数量够不够 未完成
+                    // 扣数量 未完成
+
                     const world_startpos = this.node.getWorldPosition();
                     const world_endpos = TowerManager_Controller.Instance.GetTowerScript(i_conn).node.getWorldPosition();
-                    this.GenNewSoldier(soldierID, this.cur_Party, world_startpos,world_endpos, this.OwnNodeName, i_conn);   // 生产士兵
+                    ArmyCatalogManager_Controller.Instance.GenNewSoldier(soldierID, this.cur_Party, world_startpos,world_endpos, this.OwnNodeName, i_conn);   // 生产士兵
                     cnt_GenSoldier--;
                 }
             }
@@ -141,17 +145,7 @@ export class TowerNode_Controller extends GObjectbase1 {
         }
     }
 
-    // 生产一个兵(士兵id，阵营，起点，终点, 所属塔，攻击塔)
-    GenNewSoldier(soldierid: number, partyid: number, world_startpos: Vec3, world_endpos: Vec3, fromTowername: string, toTowername: string) {
-              // 建设兵
 
-                    // 扣数量 未完成
-
-                    // 挂节点
-
-                    // 设置动画   
-                    // 设置行动，出发
-    }
 
 
 
@@ -253,7 +247,7 @@ export class TowerNode_Controller extends GObjectbase1 {
     // 判断用什么兵种
     private _getCurSoldierID(): number {
         // 未完成,后续完成
-        return 0;
+        return 1;
     }
 
 }

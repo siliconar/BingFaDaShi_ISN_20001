@@ -1,3 +1,5 @@
+import { Vec3 } from "cc";
+
 export class Utils  {
 
 
@@ -8,7 +10,11 @@ export class Utils  {
     }
     
     
-
+    static Cal_time_bypos(p1:Vec3, p2:Vec3, Speed:number) : number
+    {
+        const dist = Math.sqrt((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y))
+        return  dist/Speed;
+    }
 
 
 }

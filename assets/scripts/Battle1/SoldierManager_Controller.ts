@@ -1,4 +1,4 @@
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, Node, Prefab } from 'cc';
 import { GObjectbase1 } from '../baseclass3/GObjectbase1';
 import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
