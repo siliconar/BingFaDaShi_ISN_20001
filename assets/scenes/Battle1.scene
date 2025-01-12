@@ -2452,7 +2452,13 @@
     "Arrow": {
       "__id__": 61
     },
-    "Interval_Soidier": 3,
+    "Interval_Soidier": 10,
+    "MaxLevel": 3,
+    "LevelThreshold": [
+      40,
+      50,
+      60
+    ],
     "_id": "1bxpinwSlGTq/5Oj0uXhv4"
   },
   {
@@ -2465,7 +2471,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "enabledContactListener": false,
+    "enabledContactListener": true,
     "bullet": false,
     "awakeOnLoad": true,
     "_group": 4,
@@ -3616,7 +3622,13 @@
     "Arrow": {
       "__id__": 93
     },
-    "Interval_Soidier": 3,
+    "Interval_Soidier": 10,
+    "MaxLevel": 3,
+    "LevelThreshold": [
+      40,
+      50,
+      60
+    ],
     "_id": "02/SWG1BVGkIohxClYKahN"
   },
   {
@@ -3629,7 +3641,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "enabledContactListener": false,
+    "enabledContactListener": true,
     "bullet": false,
     "awakeOnLoad": true,
     "_group": 4,
@@ -4780,7 +4792,13 @@
     "Arrow": {
       "__id__": 125
     },
-    "Interval_Soidier": 3,
+    "Interval_Soidier": 10,
+    "MaxLevel": 3,
+    "LevelThreshold": [
+      40,
+      50,
+      60
+    ],
     "_id": "40I2GBj1lJdKd8DKshazdM"
   },
   {
@@ -4793,7 +4811,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "enabledContactListener": false,
+    "enabledContactListener": true,
     "bullet": false,
     "awakeOnLoad": true,
     "_group": 4,

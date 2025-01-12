@@ -58,13 +58,22 @@ export class baseSoldier1 extends Component implements interface_soldierbatter {
 
 
     // 设置
-    Init_Soldier(partyID: number, world_startpos: Vec3, world_endpos: Vec3, fromTowername: string, toTowername: string) {
+    Init_Soldier(partyID: number, world_startpos1: Vec3, world_endpos1: Vec3, fromTowername: string, toTowername: string) {
+
+        // 先把缓动系统停了
+        if(this.mytween!=null)
+        {
+            this.mytween.stop()
+            this.mytween = null;
+        }
+
         this.nameID = this.node.name;
         this.soldier_party = partyID;
         this.fromTowername = fromTowername;
         this.toTowername = toTowername;
 
-
+        let world_startpos = world_startpos1.clone()
+        let world_endpos = world_endpos1.clone()
         // 移动到初始位置
         this.node.setWorldPosition(world_startpos)
 
@@ -78,8 +87,8 @@ export class baseSoldier1 extends Component implements interface_soldierbatter {
 
         // 坐标转换
 
-        const diff_pos = world_startpos.add(this.node.getPosition().multiplyScalar(-1)).multiplyScalar(-1)
-        const end_pos_local = world_endpos.add(diff_pos);
+        const diff_pos = world_startpos.add(this.node.getPosition().multiplyScalar(-1)).multiplyScalar(-1)   // 注意这个运算会改变vec3的值
+        const end_pos_local = world_endpos.add(diff_pos);   // 注意这个运算会改变vec3的值
 
         // 设置缓动系统
         this.mytween = tween(this.node)
@@ -92,6 +101,18 @@ export class baseSoldier1 extends Component implements interface_soldierbatter {
     SoldierMove() {
         this.mytween.start()
     }
+
+    // 停止行动
+    // SoldierStop()
+    // {
+    //     this.mytween.stop()
+    // }
+
+    // ChangeWorldPos(worldpos:Vec3)
+    // {
+    //     console.log("士兵改变位置")
+    //     this.node.setWorldPosition(worldpos)
+    // }
 
     // 碰撞回调
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
