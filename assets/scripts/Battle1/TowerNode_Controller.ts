@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, math, Node, NodeEventType, Sprite, input, Input, EventTouch, Vec3, Collider2D, IPhysics2DContact, Contact2DType, CCInteger } from 'cc';
+import { _decorator, Component, Label, math, Node, NodeEventType, Sprite, input, Input, EventTouch, Vec3, Collider2D, IPhysics2DContact, Contact2DType, CCInteger, director, Director } from 'cc';
 import { GObjectbase1 } from '../baseclass3/GObjectbase1';
 import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
@@ -199,6 +199,7 @@ export class TowerNode_Controller extends GObjectbase1 {
     // 碰撞回调
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
 
+        
 
         // 如果碰撞的是个士兵
         const soldier_script = otherCollider.getComponent(baseSoldier1)
@@ -211,7 +212,6 @@ export class TowerNode_Controller extends GObjectbase1 {
             //     如果没有路出去，那么进入塔，回收装备
             //   我们这里改动了设计，让攻击者想攻击的时候可以攻击，别把兵都存着。之前是兵满了才会出去。
             // }
-
 
             if (soldier_script.toTowername != this.OwnNodeName)  // 如果士兵目标不是自己
             {
@@ -227,7 +227,6 @@ export class TowerNode_Controller extends GObjectbase1 {
                 if (cur_lines_cnt>0) 
                 {
                     // 先把士兵隐藏了，因为我们要调整它了
-                    // otherCo
                     // 随机选择一个方向
                     const choosen_line = Math.floor(Math.random() * cur_lines_cnt)   // 随机选择哪条路线
                     const to_name1 =  LinesManager_Controller.Instance.getConnections(this.OwnNodeName)[choosen_line]   // 提取目的地名称
@@ -238,15 +237,33 @@ export class TowerNode_Controller extends GObjectbase1 {
                     const world_startpos1 = this.node.getWorldPosition()
                     
                     soldier_script.Init_Soldier(playerID1, world_startpos1,world_endpos1,this.OwnNodeName, to_name1)
-
-                    // 未完成， 我们这里Init了，变换了位置，虽然很成功，但是会不会重复出发Collider，需要再考量
                    
                     // 注意，这里不需要再换士兵位置了，因为Init里已经做过了
-
 
                     // 缓动系统启动
                     soldier_script.SoldierMove()
                 }
+                else  // 如果外来士兵没有路出去，那么直接进塔
+                {
+                    // 执行销毁
+                    soldier_script.local_collider.enabled = false;
+                    director.once(Director.EVENT_AFTER_PHYSICS, () => {
+                        otherCollider.node.destroy()    // 直接把子弹销毁
+            
+                    })
+                    // 驻兵+1
+                    this.cur_soldier_cnt++;
+                    this.ChangeLabel(this.cur_soldier_cnt)
+                    // 未完成，需要把装备交付玩家 
+                }
+                return;
+            }
+            else if (soldier_script.soldier_party != this.cur_Party)  // 如果士兵是敌方的，交互
+            {
+                // 士兵是敌方的
+                // 逻辑如下
+                // 1. 敌方释放法术
+                
 
             }
 
