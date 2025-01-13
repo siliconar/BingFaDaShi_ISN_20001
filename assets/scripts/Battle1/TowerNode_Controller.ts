@@ -7,10 +7,11 @@ import { LinesManager_Controller } from './LinesManager_Controller';
 import { TowerManager_Controller } from './TowerManager_Controller';
 import { ArmyCatalogManager_Controller } from '../sodiers/ArmyCatalogManager_Controller';
 import { baseSoldier1 } from '../baseclass3/baseSoldier1';
+import { IAttackable } from '../Spells/IAttackable';
 const { ccclass, property } = _decorator;
 
 @ccclass('TowerNode_Controller')
-export class TowerNode_Controller extends GObjectbase1 {
+export class TowerNode_Controller extends GObjectbase1 implements IAttackable  {
 
     @property
     cur_soldier_cnt: number = 10;    // 塔中当前的士兵数量
@@ -199,7 +200,7 @@ export class TowerNode_Controller extends GObjectbase1 {
     // 碰撞回调
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
 
-        
+
 
         // 如果碰撞的是个士兵
         const soldier_script = otherCollider.getComponent(baseSoldier1)
@@ -224,20 +225,19 @@ export class TowerNode_Controller extends GObjectbase1 {
             {
                 //     如果有路出去，那么直接出去
                 const cur_lines_cnt = LinesManager_Controller.Instance.getConnectionCount(this.OwnNodeName)
-                if (cur_lines_cnt>0) 
-                {
+                if (cur_lines_cnt > 0) {
                     // 先把士兵隐藏了，因为我们要调整它了
                     // 随机选择一个方向
                     const choosen_line = Math.floor(Math.random() * cur_lines_cnt)   // 随机选择哪条路线
-                    const to_name1 =  LinesManager_Controller.Instance.getConnections(this.OwnNodeName)[choosen_line]   // 提取目的地名称
+                    const to_name1 = LinesManager_Controller.Instance.getConnections(this.OwnNodeName)[choosen_line]   // 提取目的地名称
                     const world_endpos1 = TowerManager_Controller.Instance.GetTowerScript(to_name1).node.getWorldPosition();
 
                     // 重新调整兵种的方向，让他继续行动
                     const playerID1 = this.cur_Party;
                     const world_startpos1 = this.node.getWorldPosition()
-                    
-                    soldier_script.Init_Soldier(playerID1, world_startpos1,world_endpos1,this.OwnNodeName, to_name1)
-                   
+
+                    soldier_script.Init_Soldier(playerID1, world_startpos1, world_endpos1, this.OwnNodeName, to_name1)
+
                     // 注意，这里不需要再换士兵位置了，因为Init里已经做过了
 
                     // 缓动系统启动
@@ -249,7 +249,7 @@ export class TowerNode_Controller extends GObjectbase1 {
                     soldier_script.local_collider.enabled = false;
                     director.once(Director.EVENT_AFTER_PHYSICS, () => {
                         otherCollider.node.destroy()    // 直接把子弹销毁
-            
+
                     })
                     // 驻兵+1
                     this.cur_soldier_cnt++;
@@ -263,7 +263,7 @@ export class TowerNode_Controller extends GObjectbase1 {
                 // 士兵是敌方的
                 // 逻辑如下
                 // 1. 敌方释放法术
-                
+                未完成
 
             }
 
@@ -342,6 +342,15 @@ export class TowerNode_Controller extends GObjectbase1 {
     private _getCurSoldierID(): number {
         // 未完成,后续完成
         return 1;
+    }
+
+
+    //--- 接口IAttackable实现
+    health: number; // 健康值
+    takePhysicalDamage(damage: number)
+    {
+        this.cur_soldier_cnt -=damage;
+        this.health = this.cur_soldier_cnt;
     }
 
 }

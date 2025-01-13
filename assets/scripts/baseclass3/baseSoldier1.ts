@@ -4,7 +4,7 @@ import { Utils } from './Utils';
 const { ccclass, property } = _decorator;
 
 @ccclass('baseSoldier1')
-export class baseSoldier1 extends Component implements interface_soldierbatter {
+export class baseSoldier1 extends Component  {
 
 
 
@@ -31,8 +31,7 @@ export class baseSoldier1 extends Component implements interface_soldierbatter {
 
 
     //--- 接口interface_soldierbatter变量
-    nameID: string;
-    cur_health: number;
+
 
 
 
@@ -67,7 +66,7 @@ export class baseSoldier1 extends Component implements interface_soldierbatter {
             this.mytween = null;
         }
 
-        this.nameID = this.node.name;
+
         this.soldier_party = partyID;
         this.fromTowername = fromTowername;
         this.toTowername = toTowername;
@@ -130,14 +129,7 @@ export class baseSoldier1 extends Component implements interface_soldierbatter {
 
 
     // --- 接口interface_soldierbatter函数
-    attack(): number {
-        // 吸血攻击逻辑
-        return Math.floor(Math.random() * 8) + 8; // 随机伤害 8-16
-    }
 
-    takeDamage(damage: number): void {
-        // this.health -= damage;
-    }
 }
 
 
