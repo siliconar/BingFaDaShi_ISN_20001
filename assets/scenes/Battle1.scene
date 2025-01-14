@@ -6914,10 +6914,10 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "HP": 1,
-    "Attack": 1,
-    "Defend": 1,
     "Speed": 600,
+    "Attack": 1,
+    "TowerAttack": 10,
+    "Defend": 5,
     "_id": "e886xYcP1FYYrU48KVuGsO"
   },
   {

@@ -8,10 +8,11 @@ import { TowerManager_Controller } from './TowerManager_Controller';
 import { ArmyCatalogManager_Controller } from '../sodiers/ArmyCatalogManager_Controller';
 import { baseSoldier1 } from '../baseclass3/baseSoldier1';
 import { IAttackable } from '../Spells/IAttackable';
+import { ISpell } from '../Spells/ISpell';
 const { ccclass, property } = _decorator;
 
 @ccclass('TowerNode_Controller')
-export class TowerNode_Controller extends GObjectbase1 implements IAttackable  {
+export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
     @property
     cur_soldier_cnt: number = 10;    // 塔中当前的士兵数量
@@ -195,6 +196,44 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable  {
     }
 
 
+    // [重要]升级或易主（可以自动判断是否升级）
+    private _attack_bySoldier(n1:number, sodier_party:number=0)
+    {
+        let tmp_soldier_cnt = this.cur_soldier_cnt + n1;    // 先改变一下数量
+        const cur_level_maxthreshold = this.LevelThreshold[this.cur_Tower_Level]   // 当前等级最大屯兵数
+        const cur_level_minthreshold = this.cur_Tower_Level > 1 ? this.LevelThreshold[this.cur_Tower_Level - 1] : 0   // 当前等级小屯兵数
+        if(tmp_soldier_cnt>=cur_level_maxthreshold)    // 如果大于了阈值，说明要升级
+        {
+            if(this.cur_Tower_Level < this.MaxLevel)    // 如果还有升级空间，那就升级
+            {
+                this.cur_Tower_Level++;   // 升级
+            }
+            else    // 如果没法升级了，那就什么都不做
+            {
+
+            }
+        }
+        else if (tmp_soldier_cnt<=cur_level_minthreshold)   // 如果要降级
+        {
+            if(this.cur_Tower_Level == 1)  // 如果已经是最低级了，说明要易主了
+            {
+                console.log("易主")
+                tmp_soldier_cnt =0;   //有可能被干成负数，所以要归零
+                this.cur_Party = sodier_party   // 易主
+                this.cur_Tower_Level = 1;
+                this.ChangeImage(1,sodier_party)    // 易主
+            }
+            else  // 如果只降级，不易主
+            {
+                this.cur_Tower_Level -= 1;
+                this.ChangeImage(this.cur_Tower_Level, this.cur_Party)    // 降级
+            }
+        }
+
+        this.cur_soldier_cnt = tmp_soldier_cnt   // 最后改变士兵的数量
+        this.health = this.cur_soldier_cnt;      // 接口里的值也得改
+        this.ChangeLabel(this.cur_soldier_cnt);  // 记得更改标签
+    }
 
 
     // 碰撞回调
@@ -252,8 +291,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable  {
 
                     })
                     // 驻兵+1
-                    this.cur_soldier_cnt++;
-                    this.ChangeLabel(this.cur_soldier_cnt)
+                    this._attack_bySoldier(+1,this.cur_Party);
                     // 未完成，需要把装备交付玩家 
                 }
                 return;
@@ -262,13 +300,22 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable  {
             {
                 // 士兵是敌方的
                 // 逻辑如下
-                // 1. 敌方释放法术
-                未完成
-
+                // 1. 士兵先把所有的法术对塔释放一遍
+                for (const ispell of soldier_script.spells) {
+                    soldier_script.castSpell(ispell, this)
+                }
+                // 1. 士兵对塔开始攻击
+                soldier_script.castSpell(soldier_script.towerspell, this)  // 对这个塔释放，[对塔攻击]
+                // 1. 士兵消失
+                // 执行销毁
+                soldier_script.local_collider.enabled = false;
+                director.once(Director.EVENT_AFTER_PHYSICS, () => {
+                    otherCollider.node.destroy()    // 直接把子弹销毁
+                })
             }
 
 
-        }
+        }   // if (soldier_script)
 
 
 
@@ -347,11 +394,13 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable  {
 
     //--- 接口IAttackable实现
     health: number; // 健康值
-    takePhysicalDamage(damage: number)
+    takeTowerDamage(damage: number, spell1:ISpell): void  // 可选，攻击塔时的方法
     {
-        this.cur_soldier_cnt -=damage;
-        this.health = this.cur_soldier_cnt;
+        console.log("塔-塔伤害")
+        console.log("party:"+spell1.fromParty)
+        this._attack_bySoldier(-damage,spell1.fromParty)
     }
+
 
 }
 

@@ -3,18 +3,17 @@ import { ISpell } from "./ISpell";
 
 
 // 物理攻击
-export class Spell_Physical implements ISpell {
+export class Spell_toTowerAttack implements ISpell {
 
-    private _physical_DamageNum:number; // 物理攻击伤害
-
+    private _toTower_DamageNum:number; // 对塔攻击伤害
 
     constructor() {
-        this.spellname = "Physical";
+        this.spellname = "toTowerAttack";
     }
 
     public SetDamage(n1:number, fromname:string, fromparty:number)
     {
-        this._physical_DamageNum = n1;
+        this._toTower_DamageNum = n1;
         this.fromName = fromname;
         this.fromParty = fromparty;
     }
@@ -23,7 +22,6 @@ export class Spell_Physical implements ISpell {
     fromName: string;
     fromParty: number;
     apply(target: IAttackable): void {
-        target.takePhysicalDamage(this._physical_DamageNum, this);  // 物理攻击
+        target.takeTowerDamage(this._toTower_DamageNum, this);  // 对塔攻击
     }
-
 }

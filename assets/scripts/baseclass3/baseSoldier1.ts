@@ -1,21 +1,20 @@
 import { _decorator, Collider2D, Component, Contact2DType, IPhysics2DContact, Node, tween, Tween, Vec3 } from 'cc';
+import { IAttackable } from '../Spells/IAttackable';
+import { ISpell } from '../Spells/ISpell';
+import { ISpellCaster } from '../Spells/ISpellCaster';
 import { interface_soldierbatter } from './interface_soldierbatter';
 import { Utils } from './Utils';
 const { ccclass, property } = _decorator;
 
 @ccclass('baseSoldier1')
-export class baseSoldier1 extends Component  {
+export class baseSoldier1 extends Component implements IAttackable, ISpellCaster {
 
 
 
-    @property
-    HP: number = 1
-
-    @property
+    
     Attack: number = 1
-
-    @property
-    Defend: number = 1
+    TowerAttack:number =1;
+    Defend: number = 5
 
     @property
     Speed: number = 600;
@@ -28,10 +27,6 @@ export class baseSoldier1 extends Component  {
     toTowername: string;            // 所属塔和要攻击的塔
 
     local_collider: Collider2D = null;
-
-
-    //--- 接口interface_soldierbatter变量
-
 
 
 
@@ -48,6 +43,8 @@ export class baseSoldier1 extends Component  {
         if (this.local_collider) {
             this.local_collider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
         }
+
+        
     }
 
     update(deltaTime: number) {
@@ -60,8 +57,7 @@ export class baseSoldier1 extends Component  {
     Init_Soldier(partyID: number, world_startpos1: Vec3, world_endpos1: Vec3, fromTowername: string, toTowername: string) {
 
         // 先把缓动系统停了
-        if(this.mytween!=null)
-        {
+        if (this.mytween != null) {
             this.mytween.stop()
             this.mytween = null;
         }
@@ -128,7 +124,25 @@ export class baseSoldier1 extends Component  {
     }
 
 
-    // --- 接口interface_soldierbatter函数
+    //----- 注意接口部分，继承类是一定要重载的
+    //--- 接口IAttackable实现
+    health: number =1; // 健康值
+    takePhysicalDamage(damage: number, spell1:ISpell): void  // 被物理攻击时的方法
+    {
+        console.log("士兵基类-物理伤害")
+        this.health -= damage;
+    }
+
+    //--- 接口ISpellCaster实现
+    basicspell:ISpell               // 基础攻击，这个对方不死，就一直放
+    towerspell:ISpell               // 对塔攻击效果
+    spells: ISpell[] = [];          // 这些只能释放一次
+    castSpell(spell: ISpell, target: IAttackable): void   
+    {
+        // 继承类要判断要不要改动
+        spell.apply(target);   // 释放法术
+    }
+
 
 }
 
