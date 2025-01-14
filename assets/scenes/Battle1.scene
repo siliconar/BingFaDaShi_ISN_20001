@@ -1395,7 +1395,7 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 7.887,
+      "x": -18.015,
       "y": 281.893,
       "z": 0
     },
@@ -2446,7 +2446,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "cur_soldier_cnt": 20,
+    "cur_soldier_cnt": 6,
     "cur_Tower_Level": 1,
     "cur_Party": -1,
     "Arrow": {
@@ -2455,9 +2455,9 @@
     "Interval_Soidier": 10,
     "MaxLevel": 3,
     "LevelThreshold": [
-      40,
-      50,
-      60
+      15,
+      45,
+      90
     ],
     "_id": "1bxpinwSlGTq/5Oj0uXhv4"
   },
@@ -3617,7 +3617,7 @@
     "_enabled": true,
     "__prefab": null,
     "cur_soldier_cnt": 20,
-    "cur_Tower_Level": 3,
+    "cur_Tower_Level": 2,
     "cur_Party": 1,
     "Arrow": {
       "__id__": 93
@@ -3625,9 +3625,9 @@
     "Interval_Soidier": 10,
     "MaxLevel": 3,
     "LevelThreshold": [
-      40,
-      50,
-      60
+      15,
+      45,
+      90
     ],
     "_id": "02/SWG1BVGkIohxClYKahN"
   },
@@ -3736,7 +3736,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 202.441,
-      "y": 179.357,
+      "y": 201.274,
       "z": 0
     },
     "_lrot": {
@@ -4786,7 +4786,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "cur_soldier_cnt": 20,
+    "cur_soldier_cnt": 2,
     "cur_Tower_Level": 1,
     "cur_Party": 1,
     "Arrow": {
@@ -4795,9 +4795,9 @@
     "Interval_Soidier": 10,
     "MaxLevel": 3,
     "LevelThreshold": [
-      40,
-      50,
-      60
+      15,
+      45,
+      90
     ],
     "_id": "40I2GBj1lJdKd8DKshazdM"
   },
@@ -6916,7 +6916,7 @@
     "__prefab": null,
     "Speed": 600,
     "Attack": 1,
-    "TowerAttack": 10,
+    "TowerAttack": 1,
     "Defend": 5,
     "_id": "e886xYcP1FYYrU48KVuGsO"
   },

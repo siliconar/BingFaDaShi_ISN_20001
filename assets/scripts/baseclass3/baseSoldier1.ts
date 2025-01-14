@@ -109,13 +109,13 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
     //     this.node.setWorldPosition(worldpos)
     // }
 
-    // 碰撞回调
+    // 碰撞回调，继承类要重载
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
 
         const soldier_script = otherCollider.getComponent(baseSoldier1)
         if (soldier_script)  // 如果碰撞体是一个士兵
         {
-            console.log("士兵碰撞")
+            console.log("基类士兵碰撞")
 
         }
 

@@ -48,12 +48,24 @@ export class s1_Controller extends baseSoldier1  {
 
 
 
-    // // 碰撞回调
-    // onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
+    // 碰撞回调，继承类要重载
+    onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
 
-    //     super.onBeginContact(selfCollider, otherCollider, contact)
-    //     console.log("继承类碰撞")
-    // }
+        const soldier_script = otherCollider.getComponent(baseSoldier1)
+        if (soldier_script)  // 如果碰撞体是一个士兵
+        {
+            // 士兵是敌对的，且目的地是自己的塔，那么才发生交互
+            // 只有uuid小的那个人执行代码，大的那个不执行
+            if(soldier_script.soldier_party!=this.soldier_party && soldier_script.toTowername==this.fromTowername && selfCollider.uuid< otherCollider.uuid)
+            {
+                console.log("s1士兵碰撞")
+            }
+
+            需要测试一下拐弯士兵是否能碰撞
+            但是目前士兵速度不对
+            
+        }
+    }
 
 
 

@@ -33,8 +33,9 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
     @property({ displayName: "塔最大等级" })
     MaxLevel: number = 3;      // 塔最大等级
+
     @property({ type: [CCInteger], displayName: "屯兵等级阈值" })
-    LevelThreshold: number[] = [40, 50, 60];
+    LevelThreshold: number[] = [15, 45, 90];
 
 
 
@@ -155,8 +156,9 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
             // 剩余的兵回归自身屯兵
             if (cnt_GenSoldier > 0) {
-                this.cur_soldier_cnt += cnt_GenSoldier;
-                this.ChangeLabel(this.cur_soldier_cnt);  // 记得更改标签
+                this._attack_bySoldier(cnt_GenSoldier)  // 利用这个函数，可以升级，还可以改标签
+                // this.cur_soldier_cnt += cnt_GenSoldier;
+                // this.ChangeLabel(this.cur_soldier_cnt);  // 记得更改标签
                 cnt_GenSoldier = 0;
             }
             else if (cnt_GenSoldier < 0) {
@@ -200,17 +202,19 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
     private _attack_bySoldier(n1:number, sodier_party:number=0)
     {
         let tmp_soldier_cnt = this.cur_soldier_cnt + n1;    // 先改变一下数量
-        const cur_level_maxthreshold = this.LevelThreshold[this.cur_Tower_Level]   // 当前等级最大屯兵数
-        const cur_level_minthreshold = this.cur_Tower_Level > 1 ? this.LevelThreshold[this.cur_Tower_Level - 1] : 0   // 当前等级小屯兵数
+        const cur_level_maxthreshold = this.LevelThreshold[this.cur_Tower_Level-1]   // 当前等级最大屯兵数
+        const cur_level_minthreshold = this.cur_Tower_Level > 1 ? this.LevelThreshold[this.cur_Tower_Level - 2] : 0   // 当前等级小屯兵数
         if(tmp_soldier_cnt>=cur_level_maxthreshold)    // 如果大于了阈值，说明要升级
         {
             if(this.cur_Tower_Level < this.MaxLevel)    // 如果还有升级空间，那就升级
             {
+                console.log("升级")
                 this.cur_Tower_Level++;   // 升级
+                this.ChangeImage(this.cur_Tower_Level,this.cur_Party)    // 升级
             }
             else    // 如果没法升级了，那就什么都不做
             {
-
+                tmp_soldier_cnt = cur_level_maxthreshold   // 就卡在这里，不能涨了
             }
         }
         else if (tmp_soldier_cnt<=cur_level_minthreshold)   // 如果要降级
