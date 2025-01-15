@@ -1,4 +1,4 @@
-import { _decorator, Collider2D, Component, Contact2DType, IPhysics2DContact, Node, tween, Tween, Vec3 } from 'cc';
+import { _decorator, Collider2D, Component, Contact2DType, IPhysics2DContact, Node, tween, Tween, Vec3, director, Director } from 'cc';
 import { interface_soldierbatter } from '../baseclass3/interface_soldierbatter';
 import { Utils } from '../baseclass3/Utils';
 import { TowerNode_Controller } from '../Battle1/TowerNode_Controller';
@@ -14,16 +14,18 @@ export class s1_Controller extends baseSoldier1  {
 
 
 
-
+    @property({ displayName: "最大血量" })
+    MaxHP:number =20;
 
     @property({ displayName: "攻击力" })
-    Attack: number = 1
+    Attack: number = 20 
 
     @property({ displayName: "对塔攻击力" })
     TowerAttack:number =1;
 
     @property({ displayName: "防御力" })
-    Defend: number = 5
+    Defend: number = 10
+    private real_defend_factor:number;
 
 
     protected onDestroy(): void {
@@ -38,8 +40,10 @@ export class s1_Controller extends baseSoldier1  {
         super.start()
 
         // 设置法术
-        this.basicspell1.SetDamage(this.Attack,this.node.name, this.soldier_party);
+        this.basicspell.SetDamage(this.Attack,this.node.name, this.soldier_party);
         this.towerspell.SetDamage(this.TowerAttack,this.node.name, this.soldier_party);
+        // 设置防御系数
+        this.real_defend_factor = this.Defend/(this.Defend + 33)
     }
 
     update(deltaTime: number) {
@@ -58,11 +62,28 @@ export class s1_Controller extends baseSoldier1  {
             // 只有uuid小的那个人执行代码，大的那个不执行
             if(soldier_script.soldier_party!=this.soldier_party && soldier_script.toTowername==this.fromTowername && selfCollider.uuid< otherCollider.uuid)
             {
-                console.log("s1士兵碰撞")
-            }
+                // 交互逻辑
+                while(soldier_script.health>0 && this.health>0)  // 当两个人都活着，继续战斗
+                {
+                    this.castSpell(this.basicspell,soldier_script);   // 我方释放基础攻击
+                    soldier_script.castSpell(this.basicspell,this);     // 敌方释放基础攻击
+                    // 看谁还活着
+                }
 
-            需要测试一下拐弯士兵是否能碰撞
-            但是目前士兵速度不对
+                if(soldier_script.health<=0)   // 如果敌方死球了，把他干了
+                {
+                    director.once(Director.EVENT_AFTER_PHYSICS, () => {
+                        otherCollider.node.destroy()    // 直接把子弹销毁
+                    })
+                }
+                if(this.health<=0)  // 如果自己也死了，把自己也干了
+                {
+                    director.once(Director.EVENT_AFTER_PHYSICS, () => {
+                        this.node.destroy()    // 直接把子弹销毁
+                    })
+                }
+
+            }
             
         }
     }
@@ -75,12 +96,12 @@ export class s1_Controller extends baseSoldier1  {
     health: number =1; // 健康值
     takePhysicalDamage(damage: number, spell1:ISpell): void  // 被物理攻击时的方法
     {
-        console.log("士兵s1-物理伤害")
-        this.health -= (damage-this.Defend);
+        console.log("士兵s1-互相物理伤害:damange"+damage+" res:"+(damage*(1-this.real_defend_factor)) + " factor:" +this.real_defend_factor)
+        this.health -= (damage*(1-this.real_defend_factor));
     }
 
     //--- 接口ISpellCaster实现
-    basicspell1 = new Spell_Physical();
+    basicspell = new Spell_Physical();
     towerspell = new Spell_toTowerAttack();
     spells: ISpell[] = [];     // 其他一次性法术
     castSpell(spell: ISpell, target: IAttackable): void   

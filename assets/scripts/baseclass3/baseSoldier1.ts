@@ -11,13 +11,13 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
 
 
 
-    
+    MaxHP:number =1;
     Attack: number = 1
     TowerAttack:number =1;
-    Defend: number = 5
+    Defend: number = 1
 
     @property
-    Speed: number = 600;
+    Speed: number = 120;
 
 
     //---- 内部变量
@@ -44,7 +44,8 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
             this.local_collider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
         }
 
-        
+        // 初始化状态
+        this.RecoverStatus()
     }
 
     update(deltaTime: number) {
@@ -67,10 +68,9 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
         this.fromTowername = fromTowername;
         this.toTowername = toTowername;
 
-        let world_startpos = world_startpos1.clone()
-        let world_endpos = world_endpos1.clone()
+
         // 移动到初始位置
-        this.node.setWorldPosition(world_startpos)
+        this.node.setWorldPosition(world_startpos1)
 
         // 设置动画   
         if (1 == partyID) {
@@ -81,13 +81,14 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
         }
 
         // 坐标转换
-
-        const diff_pos = world_startpos.add(this.node.getPosition().multiplyScalar(-1)).multiplyScalar(-1)   // 注意这个运算会改变vec3的值
-        const end_pos_local = world_endpos.add(diff_pos);   // 注意这个运算会改变vec3的值
+        let world_startpos_tmp = world_startpos1.clone()
+        let world_endpos_tmp = world_endpos1.clone()
+        const diff_pos = world_startpos_tmp.add(this.node.getPosition().multiplyScalar(-1)).multiplyScalar(-1)   // 注意这个运算会改变vec3的值
+        const end_pos_local = world_endpos_tmp.add(diff_pos);   // 注意这个运算会改变vec3的值
 
         // 设置缓动系统
         this.mytween = tween(this.node)
-        const pathtime = Utils.Cal_time_bypos(world_startpos, world_endpos, this.Speed)
+        const pathtime = Utils.Cal_time_bypos(world_startpos1, world_endpos1, this.Speed)
         const action = tween(this.node).to(pathtime, { position: end_pos_local })
         this.mytween.then(action)    // 添加action队列
     }
@@ -108,6 +109,12 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
     //     console.log("士兵改变位置")
     //     this.node.setWorldPosition(worldpos)
     // }
+
+    // 重设属性状态
+    RecoverStatus()
+    {
+        this.health = this.MaxHP;
+    }
 
     // 碰撞回调，继承类要重载
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
