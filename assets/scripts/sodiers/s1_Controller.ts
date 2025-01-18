@@ -7,6 +7,7 @@ import { ISpell } from '../Spells/ISpell';
 import { Spell_Physical } from '../Spells/Spell_Physical';
 import { IAttackable } from '../Spells/IAttackable';
 import { Spell_toTowerAttack } from '../Spells/Spell_toTowerAttack';
+import { Spell_Freeze } from '../Spells/Spell_Freeze';
 const { ccclass, property } = _decorator;
 
 @ccclass('s1_Controller')
@@ -42,6 +43,8 @@ export class s1_Controller extends baseSoldier1  {
         // 设置法术
         this.basicspell.SetDamage(this.Attack,this.node.name, this.soldier_party);
         this.towerspell.SetDamage(this.TowerAttack,this.node.name, this.soldier_party);
+
+        this.freezspell.SetDamage(3,this.node.name, this.soldier_party);   // 冰冻法术3级
         // 设置防御系数
         this.real_defend_factor = this.Defend/(this.Defend + 33)
     }
@@ -67,7 +70,7 @@ export class s1_Controller extends baseSoldier1  {
                 {
                     this.castSpell(this.basicspell,soldier_script);   // 我方释放基础攻击
                     soldier_script.castSpell(this.basicspell,this);     // 敌方释放基础攻击
-                    // 看谁还活着
+                    // 继续循环，看谁还活着
                 }
 
                 if(soldier_script.health<=0)   // 如果敌方死球了，把他干了
@@ -103,7 +106,11 @@ export class s1_Controller extends baseSoldier1  {
     //--- 接口ISpellCaster实现
     basicspell = new Spell_Physical();
     towerspell = new Spell_toTowerAttack();
-    spells: ISpell[] = [];     // 其他一次性法术
+
+    // 其他一次性法术设置，每个兵种不一样
+    freezspell = new Spell_Freeze();
+    
+    spells: ISpell[] = [this.freezspell];     // 其他一次性法术
     castSpell(spell: ISpell, target: IAttackable): void   
     {
         // 继承类要判断要不要改动

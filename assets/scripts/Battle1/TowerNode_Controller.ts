@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, math, Node, NodeEventType, Sprite, input, Input, EventTouch, Vec3, Collider2D, IPhysics2DContact, Contact2DType, CCInteger, director, Director } from 'cc';
+import { _decorator, Component, Label, math, Node, NodeEventType, Sprite, input, Input, EventTouch, Vec3, Collider2D, IPhysics2DContact, Contact2DType, CCInteger, director, Director, UITransform } from 'cc';
 import { GObjectbase1 } from '../baseclass3/GObjectbase1';
 import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
@@ -9,6 +9,7 @@ import { ArmyCatalogManager_Controller } from '../sodiers/ArmyCatalogManager_Con
 import { baseSoldier1 } from '../baseclass3/baseSoldier1';
 import { IAttackable } from '../Spells/IAttackable';
 import { ISpell } from '../Spells/ISpell';
+import { SpellEffectCatalogManager_Controller } from '../Spells/SpellEffectCatalogManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('TowerNode_Controller')
@@ -119,6 +120,18 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
     update(deltaTime: number) {
 
 
+        // 如果被冰冻了，啥都做不了了，返回吧
+        if (this.cur_frozentime > 0) {
+            this.cur_frozentime -= deltaTime;   // 减少冰冻时间
+
+            if(this.cur_frozentime<=0)  // 如果冻结时间从大于0，跳变为小于0，那么取消冰冻的effect
+            {
+                this.effect_Frozen.destroy()  // 摧毁这个法术
+            }
+
+            return;
+        }
+
         // 中立不出兵
         if (this.cur_Party == 0)
             return;
@@ -199,33 +212,39 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
 
     // [重要]升级或易主（可以自动判断是否升级）
-    private _attack_bySoldier(n1:number, sodier_party:number=0)
-    {
+    private _attack_bySoldier(n1: number, sodier_party: number = 0) {
         let tmp_soldier_cnt = this.cur_soldier_cnt + n1;    // 先改变一下数量
-        const cur_level_maxthreshold = this.LevelThreshold[this.cur_Tower_Level-1]   // 当前等级最大屯兵数
+        const cur_level_maxthreshold = this.LevelThreshold[this.cur_Tower_Level - 1]   // 当前等级最大屯兵数
         const cur_level_minthreshold = this.cur_Tower_Level > 1 ? this.LevelThreshold[this.cur_Tower_Level - 2] : 0   // 当前等级小屯兵数
-        if(tmp_soldier_cnt>=cur_level_maxthreshold)    // 如果大于了阈值，说明要升级
+        if (tmp_soldier_cnt >= cur_level_maxthreshold)    // 如果大于了阈值，说明要升级
         {
-            if(this.cur_Tower_Level < this.MaxLevel)    // 如果还有升级空间，那就升级
+            if (this.cur_Tower_Level < this.MaxLevel)    // 如果还有升级空间，那就升级
             {
                 console.log("升级")
                 this.cur_Tower_Level++;   // 升级
-                this.ChangeImage(this.cur_Tower_Level,this.cur_Party)    // 升级
+                this.ChangeImage(this.cur_Tower_Level, this.cur_Party)    // 升级
             }
             else    // 如果没法升级了，那就什么都不做
             {
                 tmp_soldier_cnt = cur_level_maxthreshold   // 就卡在这里，不能涨了
             }
         }
-        else if (tmp_soldier_cnt<=cur_level_minthreshold)   // 如果要降级
+        else if (tmp_soldier_cnt <= cur_level_minthreshold)   // 如果要降级
         {
-            if(this.cur_Tower_Level == 1)  // 如果已经是最低级了，说明要易主了
+            if (this.cur_Tower_Level == 1)  // 如果已经是最低级了，说明要易主了
             {
                 console.log("易主")
-                tmp_soldier_cnt =0;   //有可能被干成负数，所以要归零
+                tmp_soldier_cnt = 0;   //有可能被干成负数，所以要归零
                 this.cur_Party = sodier_party   // 易主
                 this.cur_Tower_Level = 1;
-                this.ChangeImage(1,sodier_party)    // 易主
+                this.ChangeImage(1, sodier_party)    // 易主
+                // 易主后，要删除它原来的发出的所有连接
+                director.once(Director.EVENT_AFTER_PHYSICS, () => {
+                    // 请注意，这里用director来处理，是因为Tube处理的时候，会删除线，线上有collider
+                    // 但是，易主函数可能被碰撞回调调用，碰撞回调不能处理collider的开关。
+                    LinesManager_Controller.Instance.RemoveConnections_fromTower(this.OwnNodeName)
+                })
+                
             }
             else  // 如果只降级，不易主
             {
@@ -295,7 +314,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
                     })
                     // 驻兵+1
-                    this._attack_bySoldier(+1,this.cur_Party);
+                    this._attack_bySoldier(+1, this.cur_Party);
                     // 未完成，需要把装备交付玩家 
                 }
                 return;
@@ -398,11 +417,30 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
     //--- 接口IAttackable实现
     health: number; // 健康值
-    takeTowerDamage(damage: number, spell1:ISpell): void  // 可选，攻击塔时的方法
+    takeTowerDamage(damage: number, spell1: ISpell): void  // 可选，攻击塔时的方法
     {
         console.log("塔-塔伤害")
-        console.log("party:"+spell1.fromParty)
-        this._attack_bySoldier(-damage,spell1.fromParty)
+        this._attack_bySoldier(-damage, spell1.fromParty)
+    }
+
+    cur_frozentime: number = 0; // 剩余被冻结时间
+    effect_Frozen:Node;    // 非继承，冻结特效
+    takeFrozen(frozentime: number, spell1: ISpell): void   // 可选，被冰冻的程度
+    {
+        if (frozentime == 0)
+            return;
+
+
+        // 添加冰冻法术
+        if(this.cur_frozentime<=0) // 如果还没有冰冻法术，那么就需要添加
+        {
+            const com_UITransform = this.node.getComponent(UITransform)
+            this.effect_Frozen = SpellEffectCatalogManager_Controller.Instance.GenNewSpellEffect(spell1.spellname,com_UITransform.width, com_UITransform.height,this.node.getWorldPosition())
+        }
+
+        // 添加冰冻持续时间
+        this.cur_frozentime = frozentime;
+        console.log("塔-遭受冰冻法术:" + frozentime)
     }
 
 

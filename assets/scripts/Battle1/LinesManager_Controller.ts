@@ -86,7 +86,7 @@ export class LinesManager_Controller extends GObjectbase1 {
             let newtube = instantiate(this.TubePrefab)  // 新建一个管道
             let tubename = Utils.generateUniqueString(from_name, to_name)
             newtube.name = tubename
-            newtube.getComponent(LineTube_Controller).Init(from_name,to_name)
+            newtube.getComponent(LineTube_Controller).Init(from_name, to_name)
 
             this.node.addChild(newtube)
 
@@ -150,12 +150,10 @@ export class LinesManager_Controller extends GObjectbase1 {
 
 
 
-
-    // 删除连接
-
+    // 删除连接，依靠管道名称和partyID
     RemoveConnection_by_tubename_party(tubename: string, partyID: number) {
 
-        const tubescript = this.TubeList.get(tubename)
+        const tubescript = this.TubeList.get(tubename)  // tube的脚本
         const tower1name = tubescript.Tower1name;
         const tower2name = tubescript.Tower2name;
         const tower1PartyID = tubescript.Tower1PartyID;
@@ -163,30 +161,29 @@ export class LinesManager_Controller extends GObjectbase1 {
 
 
         // 判断
-        if(tower1PartyID == partyID &&this.ConnectionInfo3.hasConnection(tower1name,tower2name)) // 如果要删除的是从Tower1出发的线
+        if (tower1PartyID == partyID && this.ConnectionInfo3.hasConnection(tower1name, tower2name)) // 如果要删除的是从Tower1出发的线
         {
             tubescript.ClearAllConnection()  // 先把图像都删除，不管是不是有两条线
-            if(this.ConnectionInfo3.hasConnection(tower2name,tower1name))  // 如果本来就有反向的连接
+            if (this.ConnectionInfo3.hasConnection(tower2name, tower1name))  // 如果本来就有反向的连接
             {
-                tubescript.EstablishSingleConnection(tower2name,tower1name)
+                tubescript.EstablishSingleConnection(tower2name, tower1name)
             }
             this.ConnectionInfo3.removeConnection(tower1name, tower2name)   // 数据表中，删除真实连接
         }
-        else if(tower2PartyID == partyID && this.ConnectionInfo3.hasConnection(tower2name,tower1name)) // 如果要删除的是从Tower2出发的线
+        else if (tower2PartyID == partyID && this.ConnectionInfo3.hasConnection(tower2name, tower1name)) // 如果要删除的是从Tower2出发的线
         {
             tubescript.ClearAllConnection()  // 先把图像都删除，不管是不是有两条线
-            if(this.ConnectionInfo3.hasConnection(tower1name,tower2name))  // 如果本来就有反向的连接
+            if (this.ConnectionInfo3.hasConnection(tower1name, tower2name))  // 如果本来就有反向的连接
             {
-                tubescript.EstablishSingleConnection(tower1name,tower2name)
+                tubescript.EstablishSingleConnection(tower1name, tower2name)
             }
             this.ConnectionInfo3.removeConnection(tower2name, tower1name)   // 数据表中，删除真实连接
         }
-        else
-        {
-            console.error("RemoveConnection中,"+tubename+"不含有partyID")
+        else {
+            console.error("RemoveConnection中," + tubename + "不含有partyID")
         }
 
-        if(partyID ==1)
+        if (partyID == 1)
             this.cur_changecolor_name = ""
 
 
@@ -197,6 +194,36 @@ export class LinesManager_Controller extends GObjectbase1 {
 
 
 
+    // 删除某个节点发出的所有射线 (被Towernode易主调用)
+    RemoveConnections_fromTower(fromname: string) {
+        // 查询这个塔发出的所有连接
+        const connect_names_vec = this.ConnectionInfo3.getConnections(fromname)
+        if (undefined == connect_names_vec)   // 如果没有连接
+            return;
+
+        // 删除每一个发出的连接
+        for (const i_toname of connect_names_vec) {
+            // 先获取对应的tuname
+            const tubename = Utils.generateUniqueString(fromname, i_toname)   // 先获取对应的tuname
+            // tube的脚本
+            const tubescript = this.TubeList.get(tubename)  // tube的脚本
+
+            // 开始删除
+            tubescript.ClearAllConnection()  // 先把图像都删除，不管是不是有两条线
+            if (this.ConnectionInfo3.hasConnection(i_toname, fromname))  // 如果本来就有反向的连接
+            {
+                tubescript.EstablishSingleConnection(i_toname, fromname)
+            }
+            this.ConnectionInfo3.removeConnection(fromname, i_toname)   // 数据表中，删除真实连接
+        }
+
+        // 测试，打印
+        this.ConnectionInfo3.printGraph()
+    }
+
+
+
+
     // 获取某节点作为起点，的连接数
     getConnectionCount(towername: string): number {
         return this.ConnectionInfo3.getConnectionCount(towername)
@@ -204,8 +231,7 @@ export class LinesManager_Controller extends GObjectbase1 {
 
 
     // 获取某节点作为起点，的连接，注意不是连接数
-    getConnections(towername:string):string[]
-    {
+    getConnections(towername: string): string[] {
         return this.ConnectionInfo3.getConnections(towername)
     }
 
