@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, Node, Vec3 } from 'cc';
+import { _decorator, Animation, Component, instantiate, Node, Vec3 } from 'cc';
 import { GObjectbase1 } from '../baseclass3/GObjectbase1';
 import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
@@ -21,7 +21,7 @@ export class ArmyCatalogManager_Controller extends GObjectbase1 {
 
 
     //---- 变量
-
+    
 
     // ----- 重载
     // 设置自己接受消息的类型，等待继承重写。
@@ -64,6 +64,13 @@ export class ArmyCatalogManager_Controller extends GObjectbase1 {
 
 
 
+    // 复制一个兵牌
+    CopyOneSoldierCard(soldierid: number): Node
+    {
+        let nodeCopy = instantiate(this.node.children[soldierid-1].children[0])
+        nodeCopy.getComponent(Animation).destroy()  // 摧毁它的动画系统
+        return nodeCopy;
+    }
 
 
     start() {

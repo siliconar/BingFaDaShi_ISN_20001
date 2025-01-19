@@ -408,10 +408,21 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
 
 
+
+
+
+    //---- 兵种部分
     // 判断用什么兵种
     private _getCurSoldierID(): number {
         // 未完成,后续完成
         return 1;
+    }
+
+    // 挂兵种
+    ChangeSoldierType(soldierID:number)
+    {
+        console.log(this.OwnNodeName + "替换兵种:"+soldierID)
+        // 未完成，写到这里了，下一步就是替换兵种
     }
 
 

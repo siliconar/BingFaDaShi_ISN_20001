@@ -1,4 +1,4 @@
-import { Vec3 } from "cc";
+import { Vec2, Vec3 } from "cc";
 
 export class Utils  {
 
@@ -14,6 +14,12 @@ export class Utils  {
     {
         const dist = Math.sqrt((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y))
         return  dist/Speed;
+    }
+
+    // 计算vec3和vec2的距离
+    static calculate_dist32(p1:Vec3, p2:Vec2):number
+    {
+        return Math.sqrt((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y))
     }
 
 
