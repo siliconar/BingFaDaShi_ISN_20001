@@ -413,18 +413,59 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
     //---- 兵种部分
     // 判断用什么兵种
+    private _cur_soldierID:number = 0
     private _getCurSoldierID(): number {
         // 未完成,后续完成
-        return 1;
+        return this._cur_soldierID;
     }
 
     // 挂兵种
     ChangeSoldierType(soldierID:number)
     {
-        console.log(this.OwnNodeName + "替换兵种:"+soldierID)
-        // 未完成，写到这里了，下一步就是替换兵种
-    }
+        if(soldierID == this._cur_soldierID)   // 如果没变化，就不需要替换兵牌了
+            return;
 
+        console.log(this.OwnNodeName + "替换兵种:"+soldierID)
+        // 下一步就是替换兵种
+        this._cur_soldierID = soldierID;
+        // 塔上方兵牌显示
+        const node_towercardholder = this.node.children[this.node.children.length -2];  // 塔的卡托的node
+        if(0 == soldierID)  // 如果是普通兵种，那么取消兵排显示
+        {
+            node_towercardholder.active = false;
+        }
+        else
+        {
+            // 获取兵牌
+            const tmp_card = ArmyCatalogManager_Controller.Instance.CopyOneSoldierCard(soldierID)
+            tmp_card.setPosition(0,-42);  // 设置大小
+            tmp_card.setScale(1.2,1.2); // 设置大小
+            // 激活显示
+            node_towercardholder.active = true;
+            const node_cardbackground_player = node_towercardholder.children[0].children[0]   // 卡托的背景色
+            const node_cardbackground_enemy = node_towercardholder.children[0].children[1]      // 卡托的背景色
+            if(this.cur_Party == 1)  // 如果是player
+            {
+                node_cardbackground_player.active = true;
+                node_cardbackground_enemy.active = false;
+
+                node_cardbackground_player.removeAllChildren();  // 移除所有子节点
+                node_cardbackground_player.addChild(tmp_card);
+                tmp_card.active = true;
+            } 
+            else  // 如果是敌人
+            {
+                node_cardbackground_player.active = false;
+                node_cardbackground_enemy.active = true;
+
+                node_cardbackground_enemy.removeAllChildren();  // 移除所有子节点
+                node_cardbackground_enemy.addChild(tmp_card);
+                tmp_card.active = true;
+            }
+        }
+    }
+ // 未完成，如果易主，记得去掉兵牌
+ // 未完成，需要添加普通兵种
 
     //--- 接口IAttackable实现
     health: number; // 健康值
