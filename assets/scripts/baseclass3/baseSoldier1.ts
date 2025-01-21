@@ -1,4 +1,4 @@
-import { _decorator, Collider2D, Component, Contact2DType, IPhysics2DContact, Node, tween, Tween, Vec3 } from 'cc';
+import { _decorator, Collider2D, Component, Contact2DType, IPhysics2DContact, Node, tween, Tween, Vec3, director, Director } from 'cc';
 import { IAttackable } from '../Spells/IAttackable';
 import { ISpell } from '../Spells/ISpell';
 import { ISpellCaster } from '../Spells/ISpellCaster';
@@ -119,14 +119,43 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
     // 碰撞回调，继承类要重载
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
 
+        // const soldier_script = otherCollider.getComponent(baseSoldier1)
+        // if (soldier_script)  // 如果碰撞体是一个士兵
+        // {
+        //     console.log("基类士兵碰撞")
+
+        // }
+
         const soldier_script = otherCollider.getComponent(baseSoldier1)
         if (soldier_script)  // 如果碰撞体是一个士兵
         {
-            console.log("基类士兵碰撞")
+            // 只有uuid小的那个人执行代码，大的那个不执行
+            if(soldier_script.soldier_party!=this.soldier_party && soldier_script.toTowername==this.fromTowername && selfCollider.uuid< otherCollider.uuid)
+            {
+                // 交互逻辑
+                while(soldier_script.health>0 && this.health>0)  // 当两个人都活着，继续战斗
+                {
+                    this.castSpell(this.basicspell,soldier_script);   // 我方释放基础攻击
+                    soldier_script.castSpell(this.basicspell,this);     // 敌方释放基础攻击
+                    // 继续循环，看谁还活着
+                }
 
+                if(soldier_script.health<=0)   // 如果敌方死球了，把他干了
+                {
+                    director.once(Director.EVENT_AFTER_PHYSICS, () => {
+                        otherCollider.node.destroy()    // 直接把子弹销毁
+                    })
+                }
+                if(this.health<=0)  // 如果自己也死了，把自己也干了
+                {
+                    director.once(Director.EVENT_AFTER_PHYSICS, () => {
+                        this.node.destroy()    // 直接把子弹销毁
+                    })
+                }
+
+            }
+            
         }
-
-
 
     }
 

@@ -16,10 +16,10 @@ export class s1_Controller extends baseSoldier1  {
 
 
     @property({ displayName: "最大血量" })
-    MaxHP:number =20;
+    MaxHP:number =5;
 
     @property({ displayName: "攻击力" })
-    Attack: number = 20 
+    Attack: number = 5 
 
     @property({ displayName: "对塔攻击力" })
     TowerAttack:number =1;
@@ -47,6 +47,8 @@ export class s1_Controller extends baseSoldier1  {
         this.freezspell.SetDamage(3,this.node.name, this.soldier_party);   // 冰冻法术3级
         // 设置防御系数
         this.real_defend_factor = this.Defend/(this.Defend + 33)
+        // 设置自身血量
+        this.health = this.MaxHP;
     }
 
     update(deltaTime: number) {
@@ -56,40 +58,10 @@ export class s1_Controller extends baseSoldier1  {
 
 
     // 碰撞回调，继承类要重载
-    onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
+    // onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
 
-        const soldier_script = otherCollider.getComponent(baseSoldier1)
-        if (soldier_script)  // 如果碰撞体是一个士兵
-        {
-            // 士兵是敌对的，且目的地是自己的塔，那么才发生交互
-            // 只有uuid小的那个人执行代码，大的那个不执行
-            if(soldier_script.soldier_party!=this.soldier_party && soldier_script.toTowername==this.fromTowername && selfCollider.uuid< otherCollider.uuid)
-            {
-                // 交互逻辑
-                while(soldier_script.health>0 && this.health>0)  // 当两个人都活着，继续战斗
-                {
-                    this.castSpell(this.basicspell,soldier_script);   // 我方释放基础攻击
-                    soldier_script.castSpell(this.basicspell,this);     // 敌方释放基础攻击
-                    // 继续循环，看谁还活着
-                }
 
-                if(soldier_script.health<=0)   // 如果敌方死球了，把他干了
-                {
-                    director.once(Director.EVENT_AFTER_PHYSICS, () => {
-                        otherCollider.node.destroy()    // 直接把子弹销毁
-                    })
-                }
-                if(this.health<=0)  // 如果自己也死了，把自己也干了
-                {
-                    director.once(Director.EVENT_AFTER_PHYSICS, () => {
-                        this.node.destroy()    // 直接把子弹销毁
-                    })
-                }
-
-            }
-            
-        }
-    }
+    // }
 
 
 
