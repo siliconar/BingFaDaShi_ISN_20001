@@ -10,6 +10,7 @@ import { baseSoldier1 } from '../baseclass3/baseSoldier1';
 import { IAttackable } from '../Spells/IAttackable';
 import { ISpell } from '../Spells/ISpell';
 import { SpellEffectCatalogManager_Controller } from '../Spells/SpellEffectCatalogManager_Controller';
+import { BattleSourceManager_Controller } from '../ChooseBattle1/BattleSourceManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('TowerNode_Controller')
@@ -124,7 +125,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
         if (this.cur_frozentime > 0) {
             this.cur_frozentime -= deltaTime;   // 减少冰冻时间
 
-            if(this.cur_frozentime<=0)  // 如果冻结时间从大于0，跳变为小于0，那么取消冰冻的effect
+            if (this.cur_frozentime <= 0)  // 如果冻结时间从大于0，跳变为小于0，那么取消冰冻的effect
             {
                 this.effect_Frozen.destroy()  // 摧毁这个法术
             }
@@ -154,31 +155,79 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
             // 迭代每个connection，出兵
             const conn_str_vec = LinesManager_Controller.Instance.getConnections(this.OwnNodeName)  // 获取这个塔有哪些连接
+
             if (conn_str_vec != undefined) {
+
                 for (const i_conn of conn_str_vec) {
 
-                    // 判断数量够不够 未完成
-                    // 扣数量 未完成
-
-                    const world_startpos = this.node.getWorldPosition();
-                    const world_endpos = TowerManager_Controller.Instance.GetTowerScript(i_conn).node.getWorldPosition();
-                    ArmyCatalogManager_Controller.Instance.GenNewSoldier(soldierID, this.cur_Party, world_startpos, world_endpos, this.OwnNodeName, i_conn);   // 生产士兵
+                    this.sendSoldier(i_conn, soldierID)   // 派1个兵出去
                     cnt_GenSoldier--;
+                }
+
+            }
+
+
+            if (this.cur_soldier_cnt >= this.LevelThreshold[this.MaxLevel - 1] && conn_str_vec!=undefined)  // 如果士兵已经满了，且有连接，就不屯兵了，强行派发
+            {
+
+                console.log("强行发兵剩余:"+cnt_GenSoldier)
+                this.schedule(function () {
+                    
+                    // 随机选一个目的地
+                    const i_idx1 = Math.floor(Math.random() * conn_str_vec.length); // 随机生成一个索引
+                    const i_conn1 = conn_str_vec[i_idx1]   // 随机选中一个连接
+                    // 发兵
+                    this.sendSoldier(i_conn1, soldierID)   // 派1个兵出去
+                }, 0.3, cnt_GenSoldier-1)   // 注意shedule的执行次数要-1，否则会多一次
+                cnt_GenSoldier = 0;
+
+            }
+            else // 如果士兵还没有满  或 虽然满了但没有连接(注意，没有连接会自动屯兵，但是屯不上，因此新增兵自动消失)
+            {
+                // 剩余的兵回归自身屯兵  或  继续强行出兵
+                if (cnt_GenSoldier > 0) {
+                    this._attack_bySoldier(cnt_GenSoldier)  // 利用这个函数，可以升级，还可以改标签
+                    // this.cur_soldier_cnt += cnt_GenSoldier;
+                    // this.ChangeLabel(this.cur_soldier_cnt);  // 记得更改标签
+                    cnt_GenSoldier = 0;
+                }
+                else if (cnt_GenSoldier < 0) {
+                    console.error("不应该出现这个, 说明connection的数量过多了")
                 }
             }
 
-            // 剩余的兵回归自身屯兵
-            if (cnt_GenSoldier > 0) {
-                this._attack_bySoldier(cnt_GenSoldier)  // 利用这个函数，可以升级，还可以改标签
-                // this.cur_soldier_cnt += cnt_GenSoldier;
-                // this.ChangeLabel(this.cur_soldier_cnt);  // 记得更改标签
-                cnt_GenSoldier = 0;
-            }
-            else if (cnt_GenSoldier < 0) {
-                console.error("不应该出现这个, 说明connection的数量过多了")
-            }
 
         }
+    }
+
+    // 派兵（不管数量，数量外部扣）
+    private sendSoldier(toname: string, soldierID1: number) {
+
+        // 判断数量够不够 ，同时扣数量
+        let tmp_soldier_ID = soldierID1
+        if(0==soldierID1)   // 如果是0号兵,无限，不需要判断
+        {
+            tmp_soldier_ID = soldierID1
+        }
+        else  // 如果不是0号兵，需要判断兵够不够
+        {
+            const tmp_soldier_cnt = BattleSourceManager_Controller.Instance.GetCardCount(soldierID1,this.cur_Party)  // 查询还剩多少卡牌
+            if(tmp_soldier_cnt==0 || tmp_soldier_cnt==undefined)  // 如果兵不足了，取消兵牌
+            {
+                this.ChangeSoldierType(0)  // 取消兵牌
+                tmp_soldier_ID = 0;
+            }
+            else  // 如果兵足够,那么扣数量
+            {
+                BattleSourceManager_Controller.Instance.ChangeCardCount(tmp_soldier_ID,this.cur_Party,-1);
+            }
+        }
+
+
+        // 出兵
+        const world_startpos = this.node.getWorldPosition();
+        const world_endpos = TowerManager_Controller.Instance.GetTowerScript(toname).node.getWorldPosition();
+        ArmyCatalogManager_Controller.Instance.GenNewSoldier(tmp_soldier_ID, this.cur_Party, world_startpos, world_endpos, this.OwnNodeName, toname);   // 生产士兵
     }
 
 
@@ -238,13 +287,14 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
                 this.cur_Party = sodier_party   // 易主
                 this.cur_Tower_Level = 1;
                 this.ChangeImage(1, sodier_party)    // 易主
+                this.ChangeSoldierType(0)    // 易主，切换普通兵，取消兵牌
                 // 易主后，要删除它原来的发出的所有连接
                 director.once(Director.EVENT_AFTER_PHYSICS, () => {
                     // 请注意，这里用director来处理，是因为Tube处理的时候，会删除线，线上有collider
                     // 但是，易主函数可能被碰撞回调调用，碰撞回调不能处理collider的开关。
                     LinesManager_Controller.Instance.RemoveConnections_fromTower(this.OwnNodeName)
                 })
-                
+
             }
             else  // 如果只降级，不易主
             {
@@ -413,38 +463,35 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
     //---- 兵种部分
     // 判断用什么兵种
-    private _cur_soldierID:number = 0
+    private _cur_soldierID: number = 0
     private _getCurSoldierID(): number {
-        // 未完成,后续完成
         return this._cur_soldierID;
     }
 
     // 挂兵种
-    ChangeSoldierType(soldierID:number)
-    {
-        if(soldierID == this._cur_soldierID)   // 如果没变化，就不需要替换兵牌了
+    ChangeSoldierType(soldierID: number) {
+        if (soldierID == this._cur_soldierID)   // 如果没变化，就不需要替换兵牌了
             return;
 
-        console.log(this.OwnNodeName + "替换兵种:"+soldierID)
+        console.log(this.OwnNodeName + "替换兵种:" + soldierID)
         // 下一步就是替换兵种
         this._cur_soldierID = soldierID;
         // 塔上方兵牌显示
-        const node_towercardholder = this.node.children[this.node.children.length -2];  // 塔的卡托的node
-        if(0 == soldierID)  // 如果是普通兵种，那么取消兵排显示
+        const node_towercardholder = this.node.children[this.node.children.length - 2];  // 塔的卡托的node
+        if (0 == soldierID)  // 如果是普通兵种，那么取消兵排显示
         {
             node_towercardholder.active = false;
         }
-        else
-        {
+        else {
             // 获取兵牌
             const tmp_card = ArmyCatalogManager_Controller.Instance.CopyOneSoldierCard(soldierID)
-            tmp_card.setPosition(0,-42);  // 设置大小
-            tmp_card.setScale(1.2,1.2); // 设置大小
+            tmp_card.setPosition(0, -42);  // 设置大小
+            tmp_card.setScale(1.2, 1.2); // 设置大小
             // 激活显示
             node_towercardholder.active = true;
             const node_cardbackground_player = node_towercardholder.children[0].children[0]   // 卡托的背景色
             const node_cardbackground_enemy = node_towercardholder.children[0].children[1]      // 卡托的背景色
-            if(this.cur_Party == 1)  // 如果是player
+            if (this.cur_Party == 1)  // 如果是player
             {
                 node_cardbackground_player.active = true;
                 node_cardbackground_enemy.active = false;
@@ -452,7 +499,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
                 node_cardbackground_player.removeAllChildren();  // 移除所有子节点
                 node_cardbackground_player.addChild(tmp_card);
                 tmp_card.active = true;
-            } 
+            }
             else  // 如果是敌人
             {
                 node_cardbackground_player.active = false;
@@ -464,8 +511,6 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
             }
         }
     }
- // 未完成，如果易主，记得去掉兵牌
- // 未完成，需要添加普通兵种
 
     //--- 接口IAttackable实现
     health: number; // 健康值
@@ -476,7 +521,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
     }
 
     cur_frozentime: number = 0; // 剩余被冻结时间
-    effect_Frozen:Node;    // 非继承，冻结特效
+    effect_Frozen: Node;    // 非继承，冻结特效
     takeFrozen(frozentime: number, spell1: ISpell): void   // 可选，被冰冻的程度
     {
         if (frozentime == 0)
@@ -484,10 +529,10 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
 
         // 添加冰冻法术
-        if(this.cur_frozentime<=0) // 如果还没有冰冻法术，那么就需要添加
+        if (this.cur_frozentime <= 0) // 如果还没有冰冻法术，那么就需要添加
         {
             const com_UITransform = this.node.getComponent(UITransform)
-            this.effect_Frozen = SpellEffectCatalogManager_Controller.Instance.GenNewSpellEffect(spell1.spellname,com_UITransform.width, com_UITransform.height,this.node.getWorldPosition())
+            this.effect_Frozen = SpellEffectCatalogManager_Controller.Instance.GenNewSpellEffect(spell1.spellname, com_UITransform.width, com_UITransform.height, this.node.getWorldPosition())
         }
 
         // 添加冰冻持续时间

@@ -1,6 +1,7 @@
 import { _decorator, Component, Director, director, Node } from 'cc';
 import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
+import { BattleSourceManager_Controller } from './BattleSourceManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('btnStart_Controller')
@@ -20,6 +21,7 @@ export class btnStart_Controller extends Component {
 
         // 延时加载场景
         this.scheduleOnce(function(){
+
             director.loadScene("Battle1")
         },0.5)   // 延时1秒加载场景
     }

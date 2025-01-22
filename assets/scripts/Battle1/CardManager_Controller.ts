@@ -4,6 +4,7 @@ import { Message3 } from '../baseclass3/Message3';
 import { MessageCenter3 } from '../baseclass3/MessageCenter3';
 import { cardholder_Controller } from './cardholder_Controller';
 import { ArmyCatalogManager_Controller } from '../sodiers/ArmyCatalogManager_Controller';
+import { BattleSourceManager_Controller } from '../ChooseBattle1/BattleSourceManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('CardManager_Controller')
@@ -23,8 +24,7 @@ export class CardManager_Controller extends GObjectbase1 {
     }
 
     //---- 内部变量
-    map_playerHoldCard: Map<number, number> = new Map<number, number>();    // 玩家本局所持卡牌数量，key = soldierID value=数量
-    map_cardPos:Map<number, number>= new Map<number, number>();      // 每一张卡座对应的牌 key=卡座位置   value = soldierID
+
 
 
     readonly Max_Num_CardHolder = 6;    // 卡座的最大数量，注意，这是个设定值，程序不可改变
@@ -56,7 +56,7 @@ export class CardManager_Controller extends GObjectbase1 {
         // 组件
         this.node_cardmask = this.node.children[0];
 
-        this.test_givePlayerCard()     // 测试发给玩家卡牌,未完成，最后删除
+
         this.placeCards()    // 放置所有卡牌，未完成，最后删除
     }
 
@@ -73,7 +73,7 @@ export class CardManager_Controller extends GObjectbase1 {
         for (let i = 0; i < this.Max_Num_CardHolder; i++) {
 
             const holderID = i;    // 当前卡托的ID
-            const tmp_soldier_ID = this.map_cardPos.get(i);   // 获取卡托ID应当仿制的士兵
+            const tmp_soldier_ID = BattleSourceManager_Controller.Instance.map_cardPos_player.get(i);   // 获取卡托ID应当仿制的士兵
 
             if(undefined == tmp_soldier_ID)  // 如果这个卡托没放东西
             {
@@ -88,7 +88,7 @@ export class CardManager_Controller extends GObjectbase1 {
             cardholder_script.Init_CardHolder(tmp_soldier_pic,"", holderID, tmp_soldier_ID)   // 让士兵添加进卡座
 
             // 设置卡座中士兵数量
-            cardholder_script.UpdateCount(this.map_playerHoldCard.get(tmp_soldier_ID))
+            cardholder_script.UpdateCount(BattleSourceManager_Controller.Instance.map_HoldCard_player.get(tmp_soldier_ID))
           }
 
     }
@@ -109,6 +109,14 @@ export class CardManager_Controller extends GObjectbase1 {
         }
     }
 
+
+    //改变某个卡座的卡牌数量
+    Update_One_Holder_Count(holderID:number, count1:number)
+    {
+        const cardholder_script = this.node.children[holderID+this.idx_bias_cardholder].getComponent(cardholder_Controller)  // 获取卡托的脚本
+        cardholder_script.UpdateCount(count1);
+    }
+
     // // 激活CardMask
     // ActiveCardMask()
     // {
@@ -116,15 +124,7 @@ export class CardManager_Controller extends GObjectbase1 {
     // }
 
 
-    // 测试发给玩家卡牌
-    test_givePlayerCard() {
-        this.map_cardPos.set(2,1)               // 每一张卡座对应的牌 key=位置   value = soldierID
-        this.map_playerHoldCard.set(1, 200);  // 玩家本局所持卡牌数量，key = soldierID value=数量
 
-        this.map_cardPos.set(0,1)           // 每一张卡座对应的牌 key=位置   value = soldierID
-        this.map_playerHoldCard.set(1, 300);  // 玩家本局所持卡牌数量，key = soldierID value=数量
-        
-    }
 
 }
 

@@ -11,11 +11,11 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
 
 
 
-    MaxHP:number =1;
+    MaxHP: number = 1;
     Attack: number = 1
-    TowerAttack:number =1;
+    TowerAttack: number = 1;
     Defend: number = 1
-
+    protected real_defend_factor: number;   // 最终防御系数，这个是算出来的
     @property
     Speed: number = 120;
 
@@ -43,6 +43,10 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
         if (this.local_collider) {
             this.local_collider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
         }
+
+
+        // 设置防御系数
+        this.real_defend_factor = this.Defend / (this.Defend + 33)
 
         // 初始化状态
         this.RecoverStatus()
@@ -111,8 +115,7 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
     // }
 
     // 重设属性状态
-    RecoverStatus()
-    {
+    RecoverStatus() {
         this.health = this.MaxHP;
     }
 
@@ -130,23 +133,23 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
         if (soldier_script)  // 如果碰撞体是一个士兵
         {
             // 只有uuid小的那个人执行代码，大的那个不执行
-            if(soldier_script.soldier_party!=this.soldier_party && soldier_script.toTowername==this.fromTowername && selfCollider.uuid< otherCollider.uuid)
-            {
+            if (soldier_script.soldier_party != this.soldier_party && soldier_script.toTowername == this.fromTowername && selfCollider.uuid < otherCollider.uuid) {
                 // 交互逻辑
-                while(soldier_script.health>0 && this.health>0)  // 当两个人都活着，继续战斗
+                while (soldier_script.health > 0 && this.health > 0)  // 当两个人都活着，继续战斗
                 {
-                    this.castSpell(this.basicspell,soldier_script);   // 我方释放基础攻击
-                    soldier_script.castSpell(this.basicspell,this);     // 敌方释放基础攻击
+                    console.log("攻击，已方:"+this.Attack+" 敌方:"+soldier_script.Attack)
+                    this.castSpell(this.basicspell, soldier_script);   // 我方释放基础攻击
+                    soldier_script.castSpell(soldier_script.basicspell, this);     // 敌方释放基础攻击
                     // 继续循环，看谁还活着
                 }
 
-                if(soldier_script.health<=0)   // 如果敌方死球了，把他干了
+                if (soldier_script.health <= 0)   // 如果敌方死球了，把他干了
                 {
                     director.once(Director.EVENT_AFTER_PHYSICS, () => {
                         otherCollider.node.destroy()    // 直接把子弹销毁
                     })
                 }
-                if(this.health<=0)  // 如果自己也死了，把自己也干了
+                if (this.health <= 0)  // 如果自己也死了，把自己也干了
                 {
                     director.once(Director.EVENT_AFTER_PHYSICS, () => {
                         this.node.destroy()    // 直接把子弹销毁
@@ -154,7 +157,7 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
                 }
 
             }
-            
+
         }
 
     }
@@ -162,19 +165,25 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
 
     //----- 注意接口部分，继承类是一定要重载的
     //--- 接口IAttackable实现
-    health: number =1; // 健康值
-    takePhysicalDamage(damage: number, spell1:ISpell): void  // 被物理攻击时的方法
+    health: number = 1; // 健康值
+    // takePhysicalDamage(damage: number, spell1:ISpell): void  // 被物理攻击时的方法
+    // {
+    //     console.log("士兵基类-物理伤害")
+    //     this.health -= damage;
+    // }
+    takePhysicalDamage(damage: number, spell1: ISpell): void  // 被物理攻击时的方法
     {
-        console.log("士兵基类-物理伤害")
-        this.health -= damage;
+        // console.log("士兵初始血量:"+ this.health)
+        this.health -= (damage * (1 - this.real_defend_factor));
+        // console.log("士兵互相物理伤害:damange" + damage + " real_damange:" + (damage * (1 - this.real_defend_factor)) + " factor:" + this.real_defend_factor)
+        // console.log("士兵剩余血量:"+ this.health)
     }
 
     //--- 接口ISpellCaster实现
-    basicspell:ISpell               // 基础攻击，这个对方不死，就一直放
-    towerspell:ISpell               // 对塔攻击效果
+    basicspell: ISpell               // 基础攻击，这个对方不死，就一直放
+    towerspell: ISpell               // 对塔攻击效果
     spells: ISpell[] = [];          // 这些只能释放一次
-    castSpell(spell: ISpell, target: IAttackable): void   
-    {
+    castSpell(spell: ISpell, target: IAttackable): void {
         // 继承类要判断要不要改动
         spell.apply(target);   // 释放法术
     }
