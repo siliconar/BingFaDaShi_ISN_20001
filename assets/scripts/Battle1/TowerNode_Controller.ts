@@ -48,6 +48,8 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
     local_collider: Collider2D = null;  // 碰撞器
 
+    readonly beAble_Gua_Soildier:boolean = true;  // 塔是否可以挂兵牌
+
     protected onLoad(): void {
         super.onLoad()
 
@@ -167,9 +169,8 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
             }
 
 
-            if (this.cur_soldier_cnt >= this.LevelThreshold[this.MaxLevel - 1] && conn_str_vec!=undefined)  // 如果士兵已经满了，且有连接，就不屯兵了，强行派发
+            if (this.cur_soldier_cnt >= this.LevelThreshold[this.MaxLevel - 1] && conn_str_vec!=undefined && conn_str_vec.length>0)  // 如果士兵已经满了，且有连接，就不屯兵了，强行派发
             {
-
                 console.log("强行发兵剩余:"+cnt_GenSoldier)
                 this.schedule(function () {
                     
@@ -211,6 +212,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
         }
         else  // 如果不是0号兵，需要判断兵够不够
         {
+            console.log(soldierID1+":"+this.cur_Party)
             const tmp_soldier_cnt = BattleSourceManager_Controller.Instance.GetCardCount(soldierID1,this.cur_Party)  // 查询还剩多少卡牌
             if(tmp_soldier_cnt==0 || tmp_soldier_cnt==undefined)  // 如果兵不足了，取消兵牌
             {
@@ -365,8 +367,10 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
                     })
                     // 驻兵+1
                     this._attack_bySoldier(+1, this.cur_Party);
-                    // 未完成，需要把装备交付玩家 
-                }
+                    // 交还卡牌
+                    if(soldier_script.soldier_ID!=0)   // 如果需要交还卡牌
+                        BattleSourceManager_Controller.Instance.ChangeCardCount(soldier_script.soldier_ID,soldier_script.soldier_party,+1)
+                } 
                 return;
             }
             else if (soldier_script.soldier_party != this.cur_Party)  // 如果士兵是敌方的，交互

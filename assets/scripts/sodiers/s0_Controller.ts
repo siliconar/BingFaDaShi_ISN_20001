@@ -38,7 +38,8 @@ export class s0_Controller extends baseSoldier1 {
         // 设置法术
         this.basicspell.SetDamage(this.Attack, this.node.name, this.soldier_party);
         this.towerspell.SetDamage(this.TowerAttack, this.node.name, this.soldier_party);
-
+        // 设置士兵ID
+        this.soldier_ID = 0
     }
 
     update(deltaTime: number) {

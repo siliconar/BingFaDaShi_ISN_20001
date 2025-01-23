@@ -43,6 +43,9 @@ export class s1_Controller extends baseSoldier1  {
         this.basicspell.SetDamage(this.Attack,this.node.name, this.soldier_party);
         this.towerspell.SetDamage(this.TowerAttack,this.node.name, this.soldier_party);
         this.freezspell.SetDamage(3,this.node.name, this.soldier_party);   // 冰冻法术3级
+
+        // 设置士兵ID
+        this.soldier_ID = 1
     }
 
     update(deltaTime: number) {

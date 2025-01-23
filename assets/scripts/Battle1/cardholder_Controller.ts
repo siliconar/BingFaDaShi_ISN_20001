@@ -1,6 +1,7 @@
-import { _decorator, Animation, Component, EventTouch, Label, Node } from 'cc';
+import { _decorator, Animation, Component, EventTouch, Label, Node, Sprite } from 'cc';
 import { CardManager_Controller } from './CardManager_Controller';
 import { cardmask_Controller } from './cardmask_Controller';
+import { TowerManager_Controller } from './TowerManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('cardholder_Controller')
@@ -56,6 +57,14 @@ export class cardholder_Controller extends Component {
     // 更新数量
     UpdateCount(n1: number) {
         this.node.children[0].getComponent(Label).string = "x" + n1.toString()
+        if (0 == n1) // 如果没牌了
+        {
+            this.node.getComponent(Sprite).grayscale = true;  // 设置灰色
+            this.ChangeChosen(false)  // 取消选中
+        }
+        else {
+            this.node.getComponent(Sprite).grayscale = false;
+        }
     }
 
     // 清空card picture
@@ -74,6 +83,11 @@ export class cardholder_Controller extends Component {
         if (this.bCardChosen == b1)   // 如果状态本来就是，那么不需要切换
             return;
 
+        if (this.node.getComponent(Sprite).grayscale == true) // 如果是灰色的，说明不能选中
+        {
+            return;
+        }
+
         this.bCardChosen = b1
         if (true == this.bCardChosen)  // 如果的确要变大
         {
@@ -82,9 +96,22 @@ export class cardholder_Controller extends Component {
 
 
             // 激活mask
-            CardManager_Controller.Instance.node_cardmask.active = true;
-            // 告诉mask当前被选中的是谁
-            CardManager_Controller.Instance.node_cardmask.getComponent(cardmask_Controller).SetSoldierID(this.card_soldier_ID)
+            CardManager_Controller.Instance.node_cardmask.getComponent(cardmask_Controller).SetActive_CardMask(true);
+            // 告诉mask当前被选中的是哪个士兵
+            CardManager_Controller.Instance.node_cardmask.getComponent(cardmask_Controller).SetMaskSoldierID(this.card_soldier_ID)
+            // 所有自己的塔放出箭头
+            for (const i_script of TowerManager_Controller.Instance.Receiver_List.values()) {
+                // 如果不是自己的塔，不放出箭头
+                if (i_script.cur_Party != 1)
+                    return;
+
+                // 如果不能挂兵牌，不放出箭头
+                if (false == i_script.beAble_Gua_Soildier)
+                    return;
+
+                // 放箭头
+                i_script.ShowArrow(true);
+            }
         }
         else  // 如果是恢复原样
         {
@@ -92,7 +119,12 @@ export class cardholder_Controller extends Component {
             this.card_silver_edge.active = false;
 
             // 不激活mask
-            CardManager_Controller.Instance.node_cardmask.active = false;
+            CardManager_Controller.Instance.node_cardmask.getComponent(cardmask_Controller).SetActive_CardMask(false);
+            // 所有自己的塔切回箭头
+            for (const i_script of TowerManager_Controller.Instance.Receiver_List.values()) {
+                // 收箭头
+                i_script.ShowArrow(false);
+            }
         }
     }
 
@@ -109,7 +141,7 @@ export class cardholder_Controller extends Component {
         // 如果是要选中卡座，那么首先得通知其他卡座取消选中
         if (false == this.bCardChosen)  // 如果是要选中卡座
         {
-            CardManager_Controller.Instance.SetAllCards_Unchosen();  // 先取消所有的卡的选中效果
+            CardManager_Controller.Instance.SetAllCards_Unchosen();  // 先取消所有的卡座的选中效果
 
         }
         this.ChangeChosen(!this.bCardChosen)

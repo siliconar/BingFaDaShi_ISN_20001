@@ -21,13 +21,13 @@ export class baseSoldier1 extends Component implements IAttackable, ISpellCaster
 
 
     //---- 内部变量
+    soldier_ID:number = -100    // 这个士兵的ID
     soldier_party: number = 0   // 士兵的阵营 1自己 0中立  -1无
     mytween: Tween<Node> = null;        // 注册一个缓动系统
     fromTowername: string;          // 所属塔和要攻击的塔
     toTowername: string;            // 所属塔和要攻击的塔
 
     local_collider: Collider2D = null;
-
 
 
     protected onDestroy(): void {

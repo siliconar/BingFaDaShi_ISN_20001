@@ -93,11 +93,13 @@ export class TowerManager_Controller extends GObjectbase1 {
 
     // }
 
-
+    // 获取塔的脚本
     GetTowerScript(towername:string):TowerNode_Controller | undefined 
     {
         return this.Receiver_List.get(towername)
     }
+
+
 
 }
 

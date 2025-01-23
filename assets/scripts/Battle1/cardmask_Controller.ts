@@ -2,6 +2,7 @@ import { _decorator, Component, EventTouch, Node } from 'cc';
 import { TowerManager_Controller } from './TowerManager_Controller';
 import { Utils } from '../baseclass3/Utils';
 import { CardManager_Controller } from './CardManager_Controller';
+import { BlackMaskManager_Controller } from './BlackMaskManager_Controller';
 const { ccclass, property } = _decorator;
 
 @ccclass('cardmask_Controller')
@@ -34,9 +35,19 @@ export class cardmask_Controller extends Component {
     }
 
 
+
+    // 激活这个mask
+    // 因为这个mask还有一层黑膜，所以不仅激活自己，还得去激活黑膜，所以我们用一个函数
+    SetActive_CardMask(bactive:boolean)
+    {
+        this.node.active = bactive;
+        BlackMaskManager_Controller.Instance.SetBlackMaskActive(bactive)
+    }
+
+
     //设置要替换的兵种
     private _chosen_soldierID:number = -1;
-    SetSoldierID(id1:number)
+    SetMaskSoldierID(id1:number)
     {
         this._chosen_soldierID = id1;
     }
@@ -48,7 +59,7 @@ export class cardmask_Controller extends Component {
     onCardMaskTouchStart(event: EventTouch) {
         // event.preventSwallow = true   //因为塔在Line之上，消息被塔捕获了，所以一定要转发消息
 
-        this.node.active = false;
+        this.SetActive_CardMask(false)
         // 判断出点是否在塔附近
         const towermap = TowerManager_Controller.Instance.Receiver_List
         for (const i_towerscript of towermap.values()) {
