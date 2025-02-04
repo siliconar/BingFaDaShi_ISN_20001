@@ -41,7 +41,8 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
 
 
-    cur_ActiveTowerID = 0;          // 当前激活的塔图片的编号
+    cur_ActiveTowerID:number;          // 当前激活的塔图片的编号
+    private readonly bias_towerID2pic:number=0;       // towerID和塔图片在child位置的换算关系
     child_label: Label = null;      // 塔上的数字
 
     HasSpaceConnect: boolean = true;   // 是否允许发射线
@@ -113,7 +114,8 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
         // 获取组件
         this.child_label = this.node.children[this.node.children.length - 1].getComponent(Label);
 
-
+        // 变量初始化
+        this.cur_ActiveTowerID = this.bias_towerID2pic;   //  当前激活的塔图片的编号，注意这个是默认值，和下面换图片无关，必须给，否则报错
         // 换图片
         this.ChangeImage(this.cur_Tower_Level, this.cur_Party)
         // 换数字
@@ -158,14 +160,13 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
             // 迭代每个connection，出兵
             const conn_str_vec = LinesManager_Controller.Instance.getConnections(this.OwnNodeName)  // 获取这个塔有哪些连接
 
-            if (conn_str_vec != undefined) {
+            if (conn_str_vec != undefined && conn_str_vec.length>0) {
 
                 for (const i_conn of conn_str_vec) {
 
                     this.sendSoldier(i_conn, soldierID)   // 派1个兵出去
-                    cnt_GenSoldier--;
                 }
-
+                cnt_GenSoldier-=conn_str_vec.length;
             }
 
 
@@ -193,7 +194,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
                     cnt_GenSoldier = 0;
                 }
                 else if (cnt_GenSoldier < 0) {
-                    console.error("不应该出现这个, 说明connection的数量过多了")
+                    console.error("不应该出现这个, 说明connection的数量过多了") // 未完成，这里有问题，复现方法试试把每个塔都挂3级，然后疯狂暴兵
                 }
             }
 
@@ -212,7 +213,6 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
         }
         else  // 如果不是0号兵，需要判断兵够不够
         {
-            console.log(soldierID1+":"+this.cur_Party)
             const tmp_soldier_cnt = BattleSourceManager_Controller.Instance.GetCardCount(soldierID1,this.cur_Party)  // 查询还剩多少卡牌
             if(tmp_soldier_cnt==0 || tmp_soldier_cnt==undefined)  // 如果兵不足了，取消兵牌
             {
@@ -238,11 +238,15 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
         let id_child = -1;
         if (party == 1)   // 如果是自己
         {
-            id_child = (level - 1) * 2;
+            id_child = (level - 1) * 2 + this.bias_towerID2pic;
+        }
+        else if(party==0) // 如果是中立
+        {
+            id_child = 6+ this.bias_towerID2pic;
         }
         else // 如果是敌人
         {
-            id_child = (level - 1) * 2 + 1;
+            id_child = (level - 1) * 2 + 1 + this.bias_towerID2pic;
         }
 
         this.node.children[this.cur_ActiveTowerID].active = false;  // 关闭当前塔的显示
@@ -273,7 +277,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
             {
                 console.log("升级")
                 this.cur_Tower_Level++;   // 升级
-                this.ChangeImage(this.cur_Tower_Level, this.cur_Party)    // 升级
+                this.ChangeImage(this.cur_Tower_Level, this.cur_Party)    // 未完成，升级图片更改，注意不在这里更改，由update执行
             }
             else    // 如果没法升级了，那就什么都不做
             {
@@ -288,7 +292,8 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
                 tmp_soldier_cnt = 0;   //有可能被干成负数，所以要归零
                 this.cur_Party = sodier_party   // 易主
                 this.cur_Tower_Level = 1;
-                this.ChangeImage(1, sodier_party)    // 易主
+                this.cur_invtime = 0;  // 易主时刻，刷兵时间要归零
+                this.ChangeImage(1, sodier_party)    // 易主图片更改，注意不在这里更改，由update执行
                 this.ChangeSoldierType(0)    // 易主，切换普通兵，取消兵牌
                 // 易主后，要删除它原来的发出的所有连接
                 director.once(Director.EVENT_AFTER_PHYSICS, () => {
@@ -301,7 +306,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
             else  // 如果只降级，不易主
             {
                 this.cur_Tower_Level -= 1;
-                this.ChangeImage(this.cur_Tower_Level, this.cur_Party)    // 降级
+                this.ChangeImage(this.cur_Tower_Level, this.cur_Party)    // 降级图片更改，注意不在这里更改，由update执行
             }
         }
 
@@ -520,7 +525,6 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
     health: number; // 健康值
     takeTowerDamage(damage: number, spell1: ISpell): void  // 可选，攻击塔时的方法
     {
-        console.log("塔-塔伤害")
         this._attack_bySoldier(-damage, spell1.fromParty)
     }
 
