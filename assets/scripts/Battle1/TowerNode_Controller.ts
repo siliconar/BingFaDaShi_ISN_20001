@@ -194,7 +194,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
                     cnt_GenSoldier = 0;
                 }
                 else if (cnt_GenSoldier < 0) {
-                    console.error("不应该出现这个, 说明connection的数量过多了") // 未完成，这里有问题，复现方法试试把每个塔都挂3级，然后疯狂暴兵
+                    console.error("不应该出现这个, 说明connection的数量过多了") // 未完成，这里有问题，复现方法试试把每个塔都挂3级，然后疯狂暴兵。大概可能是因为塔有3输出，但是被降级了，3输出还挂着
                 }
             }
 
@@ -332,6 +332,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
             //     如果没有路出去，那么进入塔，回收装备
             //   我们这里改动了设计，让攻击者想攻击的时候可以攻击，别把兵都存着。之前是兵满了才会出去。
             // }
+            // 未完成，这里逻辑有问题，我们应当改为兵直接进塔，除非塔满了
 
             if (soldier_script.toTowername != this.OwnNodeName)  // 如果士兵目标不是自己
             {
