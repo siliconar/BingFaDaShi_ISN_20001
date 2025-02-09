@@ -67,8 +67,10 @@ class GameAI:
             # -- 判断是不是己方节点
             if node.camp != self.camp:
                 continue
-            # -- 判断这个节点还能不能增加连接了 未完成
-
+            # -- 判断这个节点还能不能增加连接了,如果节点level不够，那么跳过
+            if len(current_state.connection_manager.get_connections(node.node_id)) >= node.level:
+                print("跳出")
+                continue
             # -- 取得这个节点能够输出的节点
             access_nodeID_vec = global_access_graph.get_neighbors(node.node_id)  # 注意这个得从无向图获取
             # -- 生成所有可能情况
