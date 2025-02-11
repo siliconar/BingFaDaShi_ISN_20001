@@ -10,6 +10,7 @@ class Node:
         self.node_id = node_id
         self.camp = camp
         self.hp = initial_hp
+        self.flow_soldier = 0  # 能流动的兵力，这个只用于推演时使用
         self.__updatelevelfromHP()  # 更新level
         self.production_interval = 1.5  # 非中立节点每 1.5 秒生产 1 个士兵
         self.time_accumulator = 0.0  # 用于判断是否生产士兵
@@ -37,13 +38,10 @@ class GameStateX:
         self.nodes = {node.node_id: node for node in nodes}  # 存储节点信息
         self.connection_manager = connection_manager  # 连接管理器
 
-    def simulate_time(self):
-        """
-        快速推算 n 秒之后的状态，返回一个新的 GameStateX 对象。 未完成
-        """
+    def calculate_score(self):
+
         new_nodes = {node_id: Node(node.node_id, node.camp, node.hp, node.pos)
                      for node_id, node in self.nodes.items()}  # 复制节点
-        new_connection_manager = self.connection_manager.deep_copy()  # 深拷贝连接
 
         ##计算策略如下(暂时弃用)
         # 定升级时间为15s，于是我们计算15秒，跟n没关
@@ -61,13 +59,34 @@ class GameStateX:
         # 所有节点计算3*1.5秒产兵量，该屯兵屯兵，该发送发送。
         # 一直计算到有兵产出
         # 这个难点在于怎么打分啊
+        # 打分 = 100*15秒增兵量 + 10*30秒增兵量 + 90秒总兵量
+        # 绕圈怎么办？绕圈兵直接抛弃。游戏内未完成，需要防止绕圈。
 
-        total_time = 15;
-        total_water = {"computer"}
-        cnt_nodes = len(self.nodes) # 有多少个节点
-        for i_nodeID in range(1,cnt_nodes+1):
+        step_tm=3
+        start_tm=0
+        # 先推演到15秒
+        while start_tm<15:
 
+        # 计算15秒时增兵量
+        #
 
+    def simulate_time(self,n, step_tm, new_nodes):
+        """
+        快速推算 n 秒之后的状态，直接修改new_nodes状态，原来的也会修改
+        """
+        cur_time = 0
+        while cur_time < n:
+            cur_time = cur_time + step_tm  # 时间累加
+            for i_node in new_nodes.values():
+                # 新增兵力
+                newcnt = i_node.level * step_tm / i_node.production_interval
+                # 连接派兵
+                node_conn = self.connection_manager.get_connections(i_node.node_id)  # 取出连接
+                for i_targetID in node_conn:  # 遍历所有连接，派兵
+                    if newcnt<=0:
+                        break
+                    newcnt-=1
+                    new_nodes[i_targetID].flow_soldier += 1
 
 
 
