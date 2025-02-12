@@ -1,3 +1,4 @@
+import math
 
 from ConnManager import ConnectionManager
 
@@ -11,6 +12,7 @@ class Node:
         self.camp = camp
         self.hp = initial_hp
         self.flow_soldier = 0  # 能流动的兵力，这个只用于推演时使用
+        self.enemy_soldier =0  # 敌方攻击的士兵数，因为没有即使扣减，先存这里，这个只用于推演时使用
         self.__updatelevelfromHP()  # 更新level
         self.production_interval = 1.5  # 非中立节点每 1.5 秒生产 1 个士兵
         self.time_accumulator = 0.0  # 用于判断是否生产士兵
@@ -68,51 +70,43 @@ class GameStateX:
         while start_tm<15:
 
         # 计算15秒时增兵量
-        #
+
 
     def simulate_time(self,n, step_tm, new_nodes):
         """
         快速推算 n 秒之后的状态，直接修改new_nodes状态，原来的也会修改
         """
-        cur_time = 0
-        while cur_time < n:
-            cur_time = cur_time + step_tm  # 时间累加
-            for i_node in new_nodes.values():
-                # 新增兵力
-                newcnt = i_node.level * step_tm / i_node.production_interval
-                # 连接派兵
-                node_conn = self.connection_manager.get_connections(i_node.node_id)  # 取出连接
-                for i_targetID in node_conn:  # 遍历所有连接，派兵
-                    if newcnt<=0:
-                        break
-                    newcnt-=1
-                    new_nodes[i_targetID].flow_soldier += 1
+        # 先给增上兵
+        for i_node in new_nodes.values():
+
+            # 新增兵力
+            newcnt = 0  # 当前新增数量
+            if i_node.camp != 'neutral':
+                add_level = math.floor( n/15 )  # 判断能升几级，15秒升一级
 
 
 
-        for node in new_nodes.values():
-            if node.camp == 'neutral':
-                continue
-            total_time = node.time_accumulator + n
-            produced = int(total_time // node.production_interval)
-            node.time_accumulator = total_time % node.production_interval
+        # cur_time = 0
+        # while cur_time < n:
+        #     cur_time = cur_time + step_tm  # 时间累加
+        #     # 所有兵的水位（可流动数量）清零
+        #     for i_node in new_nodes.values():
+        #         i_node.flow_soldier = 0  # 可流动数量清零
+        #
+        #     for i_node in new_nodes.values():
+        #         # 新增兵力
+        #         newcnt = i_node.level * step_tm / i_node.production_interval  # 当前新增数量
+        #         # 连接派兵
+        #         node_conn = self.connection_manager.get_connections(i_node.node_id)  # 取出连接
+        #         for i_targetID in node_conn:  # 遍历所有连接，派兵
+        #             if newcnt<=0:
+        #                 break
+        #             newcnt-=1  # 当前新增数量
+        #             new_nodes[i_targetID].flow_soldier += 1  # 可流动数量
 
-            if produced == 0:
-                continue
 
-            connected_nodes = new_connection_manager.get_connections(node.node_id)
-            if not connected_nodes:
-                node.hp += produced
-            else:
-                target_id = list(connected_nodes)[0]
-                target = new_nodes[target_id]
-                if node.camp == target.camp:
-                    target.hp += produced
-                else:
-                    target.hp -= produced
-                    if target.hp < 0:
-                        target.camp = node.camp
-                        target.hp = 0
+
+        def __quick_calculate_ntime_cnt(rawnumber,n:float):
 
         return GameStateX(list(new_nodes.values()), new_connection_manager)
 
