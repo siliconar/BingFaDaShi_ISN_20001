@@ -83,6 +83,8 @@ class GameStateX:
             newcnt = 0  # 当前新增数量
             if i_node.camp != 'neutral':
                 add_level = math.floor( n/15 )  # 判断能升几级，15秒升一级
+                if i_node.level+add_level>3:
+                    add_level = (3 if i_node.level+add_level>3 else i_node.level+add_level)  - i_node.level # 防止超过3级
 
 
 
