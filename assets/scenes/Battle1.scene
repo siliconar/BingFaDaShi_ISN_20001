@@ -23,13 +23,13 @@
         "__id__": 5
       },
       {
-        "__id__": 609
+        "__id__": 612
       }
     ],
     "_active": true,
     "_components": [],
     "_prefab": {
-      "__id__": 611
+      "__id__": 614
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -60,7 +60,7 @@
     },
     "autoReleaseAssets": false,
     "_globals": {
-      "__id__": 612
+      "__id__": 615
     },
     "_id": "025bf1bb-969b-40ba-819a-1da8d98fa6aa"
   },
@@ -202,18 +202,21 @@
       },
       {
         "__id__": 537
+      },
+      {
+        "__id__": 606
       }
     ],
     "_active": true,
     "_components": [
       {
-        "__id__": 606
+        "__id__": 609
       },
       {
-        "__id__": 607
+        "__id__": 610
       },
       {
-        "__id__": 608
+        "__id__": 611
       }
     ],
     "_prefab": null,
@@ -8109,9 +8112,9 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "cur_soldier_cnt": 89,
-    "cur_Tower_Level": 3,
-    "cur_Party": 1,
+    "cur_soldier_cnt": 40,
+    "cur_Tower_Level": 2,
+    "cur_Party": 0,
     "Arrow": {
       "__id__": 203
     },
@@ -11613,9 +11616,9 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "cur_soldier_cnt": 89,
-    "cur_Tower_Level": 3,
-    "cur_Party": -1,
+    "cur_soldier_cnt": 30,
+    "cur_Tower_Level": 2,
+    "cur_Party": 0,
     "Arrow": {
       "__id__": 299
     },
@@ -13365,9 +13368,9 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "cur_soldier_cnt": 89,
-    "cur_Tower_Level": 3,
-    "cur_Party": 1,
+    "cur_soldier_cnt": 10,
+    "cur_Tower_Level": 1,
+    "cur_Party": 0,
     "Arrow": {
       "__id__": 347
     },
@@ -15117,9 +15120,9 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "cur_soldier_cnt": 89,
-    "cur_Tower_Level": 3,
-    "cur_Party": -1,
+    "cur_soldier_cnt": 15,
+    "cur_Tower_Level": 2,
+    "cur_Party": 0,
     "Arrow": {
       "__id__": 395
     },
@@ -21599,6 +21602,88 @@
     "_id": "ad3W9jSmpKbqKMwoUWnVYV"
   },
   {
+    "__type__": "cc.Node",
+    "_name": "AI_Manager",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "_parent": {
+      "__id__": 5
+    },
+    "_children": [],
+    "_active": true,
+    "_components": [
+      {
+        "__id__": 607
+      },
+      {
+        "__id__": 608
+      }
+    ],
+    "_prefab": null,
+    "_lpos": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "_lrot": {
+      "__type__": "cc.Quat",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 1
+    },
+    "_lscale": {
+      "__type__": "cc.Vec3",
+      "x": 1,
+      "y": 1,
+      "z": 1
+    },
+    "_mobility": 0,
+    "_layer": 8,
+    "_euler": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "_id": "ad7folss1Bq4c+HZDb9sbH"
+  },
+  {
+    "__type__": "cc.UITransform",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 606
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 100,
+      "height": 100
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_id": "31vl+swkhH4ZbYvLkCWSyV"
+  },
+  {
+    "__type__": "146383S4HVCM6HQoTAcynBs",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 606
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_id": "b1ykIUTeRNjbty0en9qWlb"
+  },
+  {
     "__type__": "cc.UITransform",
     "_name": "",
     "_objFlags": 0,
@@ -21678,7 +21763,7 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 610
+        "__id__": 613
       }
     ],
     "_prefab": null,
@@ -21717,7 +21802,7 @@
     "_objFlags": 0,
     "__editorExtras__": {},
     "node": {
-      "__id__": 609
+      "__id__": 612
     },
     "_enabled": true,
     "__prefab": null,
@@ -21739,28 +21824,28 @@
   {
     "__type__": "cc.SceneGlobals",
     "ambient": {
-      "__id__": 613
-    },
-    "shadows": {
-      "__id__": 614
-    },
-    "_skybox": {
-      "__id__": 615
-    },
-    "fog": {
       "__id__": 616
     },
-    "octree": {
+    "shadows": {
       "__id__": 617
     },
-    "skin": {
+    "_skybox": {
       "__id__": 618
     },
-    "lightProbeInfo": {
+    "fog": {
       "__id__": 619
     },
-    "postSettings": {
+    "octree": {
       "__id__": 620
+    },
+    "skin": {
+      "__id__": 621
+    },
+    "lightProbeInfo": {
+      "__id__": 622
+    },
+    "postSettings": {
+      "__id__": 623
     },
     "bakedWithStationaryMainLight": false,
     "bakedWithHighpLightmap": false

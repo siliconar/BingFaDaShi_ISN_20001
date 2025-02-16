@@ -1,7 +1,7 @@
 import { _decorator, Component, Node } from 'cc';
 const { ccclass, property } = _decorator;
 
-
+// 这个暂时没人用
 
 export class ConnectionNode {
     name: string;

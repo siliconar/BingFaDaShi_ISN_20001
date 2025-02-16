@@ -164,9 +164,12 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
 
                 for (const i_conn of conn_str_vec) {
 
+                    if (cnt_GenSoldier==0)  // 如果无兵可派，直接跳出。因为有可能本来3个连接，但是塔被打降级了，支撑不了3个连接了。
+                        break;
+
                     this.sendSoldier(i_conn, soldierID)   // 派1个兵出去
+                    cnt_GenSoldier-=1
                 }
-                cnt_GenSoldier-=conn_str_vec.length;
             }
 
 
@@ -194,7 +197,7 @@ export class TowerNode_Controller extends GObjectbase1 implements IAttackable {
                     cnt_GenSoldier = 0;
                 }
                 else if (cnt_GenSoldier < 0) {
-                    console.error("不应该出现这个, 说明connection的数量过多了") // 未完成，这里有问题，复现方法试试把每个塔都挂3级，然后疯狂暴兵。大概可能是因为塔有3输出，但是被降级了，3输出还挂着
+                    console.error("不应该出现这个, 说明connection的数量过多了") 
                 }
             }
 

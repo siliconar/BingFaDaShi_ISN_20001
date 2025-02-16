@@ -1,3 +1,4 @@
+import copy
 
 from gamestate4 import *
 from UndirectedGraph import *
@@ -24,6 +25,8 @@ class GameAI:
     def dfs(self, current_state, depth):
         """
         深度优先搜索（DFS），支持状态剪枝。
+        current_state: GameStateX
+        depth: int
         """
         # 先检查当前状态是否已经访问过
         if any(state.connection_manager == current_state.connection_manager for state in self.visited_states):
@@ -32,10 +35,13 @@ class GameAI:
         # 标记当前状态已访问
         self.visited_states.append(current_state)
 
-        # 评估当前局面分数，如果大记录下来 未完成
-        random_score = random.randint(1, 10)
-        if random_score>self.best_score:
-            self.best_score = random_score
+        # 评估当前局面分数，如果比best记录大，记录下来
+        newcurrent_state = copy.deepcopy(current_state)
+        eval_score = newcurrent_state.calculate_score()
+
+
+        if eval_score>self.best_score:
+            self.best_score = eval_score
             self.best_state = current_state
 
         # 如果没深度了，就不继续往下拓展了
@@ -111,30 +117,33 @@ if __name__ == "__main__":
     global_access_graph.add_node(5)
     global_access_graph.add_node(6)
     # 添加边：1-2, 1-3
+    global_access_graph.add_edge(1, 4)
+    global_access_graph.add_edge(1, 6)
     global_access_graph.add_edge(1, 2)
-    global_access_graph.add_edge(1, 3)
-    global_access_graph.add_edge(2, 3)
-    global_access_graph.add_edge(4, 2)
-    global_access_graph.add_edge(4, 5)
     global_access_graph.add_edge(4, 6)
-    global_access_graph.add_edge(5, 6)
+    global_access_graph.add_edge(4, 2)
+    global_access_graph.add_edge(2, 3)
+    global_access_graph.add_edge(2, 5)
+    global_access_graph.add_edge(3, 5)
+
+
 
 
     #------ 创建节点
-    node1 = Node(1, 'computer', initial_hp=10, pos=(100, 100))
-    node2 = Node(2, 'player', initial_hp=10, pos=(500, 100))
-    node3 = Node(3, 'neutral', initial_hp=10, pos=(300, 200))
-    node4 = Node(4, 'computer', initial_hp=10, pos=(100, 300))
+    node1 = Node(1, 'computer', initial_hp=1, pos=(100, 100))
+    node2 = Node(2, 'neutral', initial_hp=18, pos=(500, 100))
+    node3 = Node(3, 'neutral', initial_hp=20, pos=(300, 200))
+    node4 = Node(4, 'neutral', initial_hp=10, pos=(100, 300))
     node5 = Node(5, 'player', initial_hp=10, pos=(500, 300))
     node6 = Node(6, 'neutral', initial_hp=10, pos=(300, 350))
     node_list = [node1, node2, node3, node4, node5, node6]
 
     # 设置节点之间的连接
     conn = ConnectionManager()
-    conn.add_connection(1,2)
-    conn.add_connection(2, 1)
-    conn.add_connection(4, 1)
-    conn.add_connection(5, 6)
+    # conn.add_connection(1,2)
+    # conn.add_connection(2, 1)
+    # conn.add_connection(4, 1)
+    # conn.add_connection(5, 6)
 
 
 
@@ -151,7 +160,8 @@ if __name__ == "__main__":
 
 
     # 创建一个游戏状态
-    game_state = GameStateX(node_list,conn2)
+    # game_state = GameStateX(node_list,conn2)
+    game_state = GameStateX(node_list, conn)
     result = ai2.dfs(game_state, depth=3)
 
     # 输出搜索结果
